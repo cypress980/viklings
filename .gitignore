@@ -1,5 +1,17 @@
 *.class
 
+# Eclipse project files
+.project
+.settings
+.classpath
+target
+
+# vim swap files
+*.swp
+
+# mac directory files
+.DS_Store
+
 # Mobile Tools for Java (J2ME)
 .mtj.tmp/
 
