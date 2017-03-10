@@ -6,7 +6,7 @@ import graphics.Mesh;
 
 public class GameItem {
 
-    private final Mesh mesh;
+    private Mesh mesh;
 
     private final Vector3f position;
 
@@ -14,18 +14,22 @@ public class GameItem {
 
     private final Vector3f rotation;
 
-    public GameItem(Mesh mesh) {
-        this.mesh = mesh;
+    public GameItem() {
         position = new Vector3f(0, 0, 0);
         scale = 1;
         rotation = new Vector3f(0, 0, 0);
     }
 
+    public GameItem(Mesh mesh) {
+        this();
+        this.mesh = mesh;
+    }
+
     public Vector3f getPosition() {
         return position;
     }
-
-    public void setPosition(float x, float y, float z) {
+    
+	public void setPosition(float x, float y, float z) {
         this.position.x = x;
         this.position.y = y;
         this.position.z = z;
@@ -48,6 +52,10 @@ public class GameItem {
         this.rotation.y = y;
         this.rotation.z = z;
     }
+    
+    public void setMesh(Mesh mesh) {
+		this.mesh = mesh;
+	}
 
     public Mesh getMesh() {
         return mesh;

@@ -6,6 +6,7 @@ import org.joml.Vector3f;
 import engine.GameItem;
 import engine.GameLogic;
 import engine.GameWindow;
+import engine.Hud;
 import engine.MouseInput;
 import graphics.Camera;
 import graphics.DirectionalLight;
@@ -15,6 +16,7 @@ import graphics.ObjLoader;
 import graphics.PointLight;
 import graphics.Renderer;
 import graphics.SpotLight;
+import graphics.TextHud;
 import graphics.Texture;
 
 import static org.lwjgl.glfw.GLFW.*;
@@ -45,6 +47,8 @@ public class DummyGame implements GameLogic {
     private float spotInc = 1;
     
 	private DirectionalLight directionalLight;
+
+	private Hud hud;
 
     private static final float CAMERA_POS_STEP = 0.05f;
 
@@ -97,6 +101,8 @@ public class DummyGame implements GameLogic {
         lightPosition = new Vector3f(-1, 0, 0);
         directionalLight = new DirectionalLight(new Vector3f(1, 1, 1), lightPosition, lightIntensity);
         
+        // Create HUD
+        hud = new TextHud("HI CUDDLEBUG");
     }
 
     @Override
@@ -161,7 +167,8 @@ public class DummyGame implements GameLogic {
 
     @Override
     public void render(GameWindow window) {
-        renderer.render(window, camera, gameItems, ambientLight, pointLightList, spotLightList, directionalLight);
+        renderer.render(window, camera, gameItems, ambientLight, pointLightList, 
+        		spotLightList, directionalLight, hud);
     }
 
     @Override
