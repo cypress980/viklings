@@ -6,10 +6,10 @@ import java.util.List;
 import java.util.stream.Stream;
 
 import graphics.Material;
-import graphics.Mesh;
+import graphics.Model;
 import graphics.Texture;
 
-public class TextItem extends GameItem {
+public class TextItem extends GamePosition {
 
     private static final float ZPOS = 0.0f;
 
@@ -30,7 +30,7 @@ public class TextItem extends GameItem {
         this.setMesh(buildMesh(texture, numCols, numRows));
     }
 
-    private Mesh buildMesh(Texture texture, int numCols, int numRows) {
+    private Model buildMesh(Texture texture, int numCols, int numRows) {
         byte[] chars = text.getBytes(Charset.forName("ISO-8859-1"));
         int numChars = chars.length;
 
@@ -97,7 +97,7 @@ public class TextItem extends GameItem {
         }
         
         int[] indicesArr = indices.stream().mapToInt(i->i).toArray();
-        Mesh mesh = new Mesh(posArr, textCoordsArr, normals, indicesArr);
+        Model mesh = new Model(posArr, textCoordsArr, normals, indicesArr);
         mesh.setMaterial(new Material(texture));
         return mesh;
     }

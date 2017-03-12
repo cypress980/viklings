@@ -1,6 +1,7 @@
-package graphics;
+package graphics.scene;
 
 import static org.lwjgl.opengl.GL20.*;
+import static org.lwjgl.opengl.GL11.GL_TRUE;
 
 import java.nio.FloatBuffer;
 import java.util.HashMap;
@@ -9,6 +10,8 @@ import java.util.Map;
 import org.joml.Matrix4f;
 import org.joml.Vector3f;
 import org.lwjgl.system.MemoryStack;
+
+import graphics.Material;
 
 public class ShaderProgram {
     private final int programId;
@@ -67,7 +70,7 @@ public class ShaderProgram {
         }
 
         glValidateProgram(programId);
-        if (glGetProgrami(programId, GL_VALIDATE_STATUS) == 0) {
+        if (glGetProgrami(programId, GL_VALIDATE_STATUS) != GL_TRUE) {
             System.err.println("Warning validating Shader code: " + glGetProgramInfoLog(programId, 1024));
         }
 

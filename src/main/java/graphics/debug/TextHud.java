@@ -1,10 +1,9 @@
-package graphics;
+package graphics.debug;
 
 import org.joml.Vector3f;
 
-import engine.GameItem;
+import engine.GamePosition;
 import engine.GameWindow;
-import engine.Hud;
 import engine.TextItem;
 
 public class TextHud implements Hud {
@@ -15,14 +14,14 @@ public class TextHud implements Hud {
 
     private static final String FONT_TEXTURE = "textures/font_texture.png";
 
-    private final GameItem[] gameItems;
+    private final GamePosition[] gameItems;
 
     private final TextItem statusTextItem;
 
     public TextHud(String statusText) throws Exception {
         this.statusTextItem = new TextItem(statusText, FONT_TEXTURE, FONT_COLS, FONT_ROWS);
         this.statusTextItem.getMesh().getMaterial().setColor(new Vector3f(1, 1, 1));
-        gameItems = new GameItem[]{statusTextItem};
+        gameItems = new GamePosition[]{statusTextItem};
     }
 
     public void setStatusText(String statusText) {
@@ -30,7 +29,7 @@ public class TextHud implements Hud {
     }
 
     @Override
-    public GameItem[] getGameItems() {
+    public GamePosition[] getGameItems() {
         return gameItems;
     }
     

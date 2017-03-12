@@ -1,12 +1,14 @@
 package engine;
 
+import org.joml.Matrix4f;
 import org.joml.Vector3f;
 
-import graphics.Mesh;
+import graphics.Model;
+import graphics.scene.SceneRenderable;
 
-public class GameItem {
+public class GamePosition {
 
-    private Mesh mesh;
+    private Model mesh;
 
     private final Vector3f position;
 
@@ -14,13 +16,13 @@ public class GameItem {
 
     private final Vector3f rotation;
 
-    public GameItem() {
+    public GamePosition() {
         position = new Vector3f(0, 0, 0);
         scale = 1;
         rotation = new Vector3f(0, 0, 0);
     }
 
-    public GameItem(Mesh mesh) {
+    public GamePosition(Model mesh) {
         this();
         this.mesh = mesh;
     }
@@ -53,11 +55,11 @@ public class GameItem {
         this.rotation.z = z;
     }
     
-    public void setMesh(Mesh mesh) {
+    public void setMesh(Model mesh) {
 		this.mesh = mesh;
 	}
 
-    public Mesh getMesh() {
+    public Model getMesh() {
         return mesh;
     }
 }

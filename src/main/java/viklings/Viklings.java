@@ -21,7 +21,7 @@ public class Viklings {
     public static void main(String[] args) {
         try {
             boolean vSync = true;
-            GameLogic gameLogic = new DummyGame();
+            GameLogic gameLogic = new DummyGame2();
             GameEngine gameEng = new GameEngine("Viklings", 600, 480, vSync, gameLogic);
             gameEng.start();
         } catch (Exception excp) {

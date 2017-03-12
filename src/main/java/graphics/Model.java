@@ -12,7 +12,7 @@ import static org.lwjgl.opengl.GL20.*;
 import static org.lwjgl.opengl.GL30.*;
 import org.lwjgl.system.MemoryUtil;
 
-public class Mesh {
+public class Model {
 
     private final int vaoId;
 
@@ -22,7 +22,7 @@ public class Mesh {
 
 	private Material material;
 
-    public Mesh(float[] positions, float[] textCoords, float[] normals, int[] indices) {
+    public Model(float[] positions, float[] textCoords, float[] normals, int[] indices) {
         FloatBuffer posBuffer = null;
         FloatBuffer textCoordsBuffer = null;
         FloatBuffer vecNormalsBuffer = null;

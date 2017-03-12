@@ -8,7 +8,7 @@ import org.joml.Vector3f;
 public class ObjLoader {
 	private ResourceLoader resourceLoader = new ResourceLoader();
 
-    public Mesh loadMesh(String fileName) throws Exception {
+    public Model loadMesh(String fileName) throws Exception {
         List<String> lines = resourceLoader.readAllLines(fileName);
         
         List<Vector3f> vertices = new ArrayList<>();
@@ -54,7 +54,7 @@ public class ObjLoader {
         return reorderLists(vertices, textures, normals, faces);
     }
 
-    private static Mesh reorderLists(List<Vector3f> posList, List<Vector2f> textCoordList,
+    private static Model reorderLists(List<Vector3f> posList, List<Vector2f> textCoordList,
             List<Vector3f> normList, List<Face> facesList) {
 
         List<Integer> indices = new ArrayList<>();
@@ -79,7 +79,7 @@ public class ObjLoader {
         }
         int[] indicesArr = new int[indices.size()];
         indicesArr = indices.stream().mapToInt((Integer v) -> v).toArray();
-        Mesh mesh = new Mesh(posArr, textCoordArr, normArr, indicesArr);
+        Model mesh = new Model(posArr, textCoordArr, normArr, indicesArr);
         return mesh;
     }
 

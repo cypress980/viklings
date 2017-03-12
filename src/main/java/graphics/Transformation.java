@@ -3,7 +3,8 @@ package graphics;
 import org.joml.Matrix4f;
 import org.joml.Vector3f;
 
-import engine.GameItem;
+import engine.GamePosition;
+import graphics.scene.Camera;
 
 public class Transformation {
     private final Matrix4f projectionMatrix;
@@ -41,7 +42,7 @@ public class Transformation {
         return viewMatrix;
     }
 
-    public Matrix4f getModelViewMatrix(GameItem gameItem, Matrix4f viewMatrix) {
+    public Matrix4f getModelViewMatrix(GamePosition gameItem, Matrix4f viewMatrix) {
         Vector3f rotation = gameItem.getRotation();
         modelViewMatrix.identity().translate(gameItem.getPosition()).
                 rotateX((float)Math.toRadians(-rotation.x)).
@@ -58,7 +59,7 @@ public class Transformation {
         return orthoMatrix;
     }
     
-    public Matrix4f getOrthoProjModelMatrix(GameItem gameItem, Matrix4f orthoMatrix) {
+    public Matrix4f getOrthoProjModelMatrix(GamePosition gameItem, Matrix4f orthoMatrix) {
         Vector3f rotation = gameItem.getRotation();
         Matrix4f modelMatrix = new Matrix4f();
         modelMatrix.identity().translate(gameItem.getPosition()).
