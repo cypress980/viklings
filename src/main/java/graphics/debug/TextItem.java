@@ -5,12 +5,13 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Stream;
 
-import engine.GamePosition;
+import engine.GameComponent;
+import graphics.Position;
 import graphics.Material;
 import graphics.Model;
 import graphics.Texture;
 
-public class TextItem extends GamePosition {
+public class TextItem implements DebugRenderable {
 
     private static final float ZPOS = 0.0f;
 
@@ -22,13 +23,18 @@ public class TextItem extends GamePosition {
     
     private final int numRows;
     
+    private Model model;
+    
+    private Position position;
+    
     public TextItem(String text, String fontFileName, int numCols, int numRows) throws Exception {
         super();
         this.text = text;
         this.numCols = numCols;
         this.numRows = numRows;
         Texture texture = new Texture(fontFileName);
-        this.setModel(buildMesh(texture, numCols, numRows));
+        this.model = buildMesh(texture, numCols, numRows);
+        this.position = new Position();
     }
 
     private Model buildMesh(Texture texture, int numCols, int numRows) {
@@ -109,8 +115,21 @@ public class TextItem extends GamePosition {
     
     public void setText(String text) {
         this.text = text;
-        Texture texture = this.getModel().getMaterial().getTexture();
-        this.getModel().deleteBuffers();
-        this.setModel(buildMesh(texture, numCols, numRows));
+        Texture texture = model.getMaterial().getTexture();
+        model.deleteBuffers();
+        model = buildMesh(texture, numCols, numRows);
+    }
+
+    public void setPosition(float x, float y) {
+        this.position.setPosition(x, y, 0);
+    }
+    
+    public Model getModel() {
+	return model;
+    }
+
+    @Override
+    public Position getPosition() {
+	return position;
     }
 }

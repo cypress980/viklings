@@ -1,15 +1,9 @@
 package graphics.debug;
 
-import engine.GamePosition;
+import graphics.Position;
+import graphics.Model;
 
 public interface DebugRenderable {
-
-    GamePosition[] getGameItems();
-
-    default void cleanup() {
-        GamePosition[] gameItems = getGameItems();
-        for (GamePosition gameItem : gameItems) {
-            gameItem.getModel().cleanUp();
-        }
-    }
+    Model getModel();
+    Position getPosition();
 }

@@ -14,8 +14,8 @@ import org.lwjgl.system.MemoryStack;
 import graphics.scene.DirectionalLight;
 import graphics.scene.PointLight;
 import graphics.scene.SpotLight;
-import graphics.scene.PointLight.Attenuation;
 
+//TODO: Refactor this mess of a class
 public class ShaderProgram {
     private final int programId;
 

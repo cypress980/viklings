@@ -1,9 +1,11 @@
 package graphics.debug;
 
+import java.util.List;
+
 import org.joml.Matrix4f;
 import org.joml.Vector3f;
 
-import engine.GamePosition;
+import graphics.Position;
 import graphics.Model;
 import graphics.Renderer;
 import graphics.ResourceLoader;
@@ -18,7 +20,7 @@ public class DebugRenderer implements Renderer {
     
     private int windowWidthPx;
     
-    private DebugRenderable debug;
+    private List<? extends DebugRenderable> debug;
 
     private Matrix4f orthoMatrix;
     
@@ -43,10 +45,10 @@ public class DebugRenderer implements Renderer {
         
         //TODO: we only need to make this call when the window size changes
         Matrix4f ortho = getOrthoProjectionMatrix(0, windowWidthPx, windowHeightPx, 0);
-        for (GamePosition item : debug.getGameItems()) {
+        for (DebugRenderable item : debug) {
             Model mesh = item.getModel();
             // Set orthographic and model matrix for this HUD item
-            Matrix4f projModelMatrix = getOrthoProjModelMatrix(item, ortho);
+            Matrix4f projModelMatrix = getOrthoProjModelMatrix(item.getPosition(), ortho);
             hudShaderProgram.setUniform("projModelMatrix", projModelMatrix);
             hudShaderProgram.setUniform("color", item.getModel().getMaterial().getColor());
 
@@ -72,8 +74,8 @@ public class DebugRenderer implements Renderer {
         this.windowWidthPx = windowWidthPx;
     }
     
-    public void setHud(DebugRenderable hud) {
-	this.debug = hud;
+    public void setHud(List<? extends DebugRenderable> debug) {
+	this.debug = debug;
     }
     
     private Matrix4f getOrthoProjectionMatrix(float left, float right, float bottom, float top) {
@@ -82,7 +84,7 @@ public class DebugRenderer implements Renderer {
         return orthoMatrix;
     }
     
-    private Matrix4f getOrthoProjModelMatrix(GamePosition gameItem, Matrix4f orthoMatrix) {
+    private Matrix4f getOrthoProjModelMatrix(Position gameItem, Matrix4f orthoMatrix) {
         Vector3f rotation = gameItem.getRotation();
         Matrix4f modelMatrix = new Matrix4f();
         modelMatrix.identity().translate(gameItem.getPosition()).

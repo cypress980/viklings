@@ -4,13 +4,14 @@ import org.joml.Matrix4f;
 import org.joml.Vector3f;
 import org.joml.Vector4f;
 
-import engine.GamePosition;
+import graphics.Position;
 import graphics.Model;
 import graphics.Renderer;
 import graphics.ResourceLoader;
 import graphics.ShaderProgram;
 import static org.lwjgl.opengl.GL11.*;
 
+import java.util.List;
 import java.util.Collection;
 
 public class SceneRenderer implements Renderer {
@@ -19,23 +20,14 @@ public class SceneRenderer implements Renderer {
      * Field of View in Radians
      */
     private static final float FOV = (float) Math.toRadians(60.0f);
-
     private static final float Z_NEAR = 0.01f;
-
     private static final float Z_FAR = 1000.f;
-
     private static final int MAX_POINT_LIGHTS = 5;
-
     private static final int MAX_SPOT_LIGHTS = 5;
-
     private ShaderProgram sceneShaderProgram;
-
     private final float specularPower;
-    
     private final Matrix4f projectionMatrix;
-
     private final Matrix4f modelViewMatrix;
-    
     private final Matrix4f viewMatrix;
     
     public SceneRenderer() {
@@ -67,6 +59,8 @@ public class SceneRenderer implements Renderer {
     private Vector3f ambientLight;
 
     private DirectionalLight directionalLight;
+    private List<PointLight> pointLights;
+    private List<SpotLight> spotLights;
     
     @Override
     public void loadShaders() throws Exception {
@@ -90,6 +84,14 @@ public class SceneRenderer implements Renderer {
         sceneShaderProgram.createSpotLightListUniform("spotLights", MAX_SPOT_LIGHTS);
         sceneShaderProgram.createDirectionalLightUniform("directionalLight");
     }
+    
+    public void setPointLights(List<PointLight> pointLights) {
+	this.pointLights = pointLights;
+    }
+    
+    public void setSpotLights(List<SpotLight> spotLights) {
+	this.spotLights = spotLights;
+    }
 
     @Override
     public void render() {
@@ -112,12 +114,15 @@ public class SceneRenderer implements Renderer {
         prepareLightingGlobals(viewMatrix);
         
 	// Prepare Lighting Uniforms
-	for (SceneRenderable thing : scene) {
-	    if (thing.hasPointLight() && ++pointLights < MAX_POINT_LIGHTS) {
-		preparePointLight(thing.getPointLight(), pointLights, viewMatrix);
+	for (PointLight pointLight : this.pointLights) {
+	    if (++pointLights < MAX_POINT_LIGHTS) {
+		preparePointLight(pointLight, pointLights, viewMatrix);
 	    }
-	    if (thing.hasSpotLight() && ++spotLights < MAX_SPOT_LIGHTS) {
-		prepareSpotLight(thing.getSpotLight(), spotLights, viewMatrix);
+	    
+	} 
+	for (SpotLight spotLight : this.spotLights) {
+	    if (++spotLights < MAX_SPOT_LIGHTS) {
+		prepareSpotLight(spotLight, spotLights, viewMatrix);
 	    }
 	}
 	
@@ -225,25 +230,26 @@ public class SceneRenderer implements Renderer {
     }
     
     private Matrix4f getViewMatrix(Camera camera) {
-        Vector3f cameraPos = camera.getPosition();
-        Vector3f rotation = camera.getRotation();
-        
         viewMatrix.identity();
+        
         // First do the rotation so camera rotates over its position
-        viewMatrix.rotate((float)Math.toRadians(rotation.x), new Vector3f(1, 0, 0))
-                .rotate((float)Math.toRadians(rotation.y), new Vector3f(0, 1, 0));
+        viewMatrix.rotate((float)Math.toRadians(camera.getRotation().x), new Vector3f(1, 0, 0))
+            	  .rotate((float)Math.toRadians(camera.getRotation().y), new Vector3f(0, 1, 0))
+            	  .rotate((float)Math.toRadians(camera.getRotation().z), new Vector3f(0, 0, 1));
+        
         // Then do the translation
-        viewMatrix.translate(-cameraPos.x, -cameraPos.y, -cameraPos.z);
+        viewMatrix.translate(-camera.getPosition().x, -camera.getPosition().y, -camera.getPosition().z);
+        
         return viewMatrix;
     }
 
-    private Matrix4f getModelViewMatrix(GamePosition gameItem, Matrix4f viewMatrix) {
-        Vector3f rotation = gameItem.getRotation();
+    private Matrix4f getModelViewMatrix(Position gameItem, Matrix4f viewMatrix) {
         modelViewMatrix.identity().translate(gameItem.getPosition()).
-                rotateX((float)Math.toRadians(-rotation.x)).
-                rotateY((float)Math.toRadians(-rotation.y)).
-                rotateZ((float)Math.toRadians(-rotation.z)).
+                rotateX((float)Math.toRadians(-gameItem.getRotation().x)).
+                rotateY((float)Math.toRadians(-gameItem.getRotation().y)).
+                rotateZ((float)Math.toRadians(-gameItem.getRotation().z)).
                 scale(gameItem.getScale());
+        
         Matrix4f viewCurr = new Matrix4f(viewMatrix);
         return viewCurr.mul(modelViewMatrix);
     }

@@ -3,19 +3,17 @@ package viklings;
 import org.joml.Vector2f;
 import org.joml.Vector3f;
 
-import engine.GamePosition;
 import engine.GameComponent;
 import engine.GameLogic;
 import engine.GameWindow;
 import engine.MouseInput;
+import graphics.Position;
 import graphics.GraphicsEngine;
 import graphics.Material;
 import graphics.Model;
 import graphics.ObjLoader;
-import graphics.Renderer;
 import graphics.Texture;
 import graphics.debug.DebugRenderer;
-import graphics.debug.DebugRenderable;
 import graphics.debug.DebugText;
 import graphics.scene.Camera;
 import graphics.scene.DirectionalLight;
@@ -25,6 +23,7 @@ import graphics.scene.SpotLight;
 
 import static org.lwjgl.glfw.GLFW.*;
 
+import java.util.List;
 import java.util.ArrayList;
 import java.util.Collection;
 
@@ -47,15 +46,15 @@ public class DummyGame implements GameLogic {
 
     private float lightAngle;
 
-    private PointLight[] pointLightList = new PointLight[5];
+    private List<PointLight> pointLights = new ArrayList<>(5);
 
-    private SpotLight[] spotLightList = new SpotLight[5];
+    private List<SpotLight> spotLights = new ArrayList<>(5);
 
     private DirectionalLight directionalLight;
     
     private GraphicsEngine graphicsEngine;
 
-    private DebugText hud;
+    private List<DebugText> debugTexts = new ArrayList<>();;
 
     private static final float CAMERA_POS_STEP = 0.05f;
 
@@ -76,21 +75,18 @@ public class DummyGame implements GameLogic {
         sceneRenderer.setScene(gameComponents);
 
         //Set up objects in scene
-        float reflectance = 1f;
         ObjLoader meshMaker = new ObjLoader();
-        Model cube = meshMaker.loadMesh("models/cube.obj");
-        Texture texture = new Texture("textures/grassblock.png");
-        Material material = new Material(texture, reflectance);
-        
-        cube.setMaterial(material);
-        GamePosition position = new GamePosition(cube);
+        GameComponent grassblock = new GameComponent();
+        Position position = new Position();
         position.setScale(0.5f);
         position.setPosition(0, 0, -2);
-        
-        GameComponent grassblock = new GameComponent();
+        Model cube = meshMaker.loadMesh("models/cube.obj");
+        Texture texture = new Texture("textures/grassblock.png");
+        float reflectance = 1f;
+        Material material = new Material(texture, reflectance);
+        cube.setMaterial(material);
         grassblock.setModel(cube);
         grassblock.setPosition(position);
-        
         gameComponents.add(grassblock);
         
         // Point Light
@@ -99,10 +95,8 @@ public class DummyGame implements GameLogic {
         PointLight pointLight = new PointLight(new Vector3f(1, 1, 1), lightPosition, lightIntensity);
         PointLight.Attenuation att = new PointLight.Attenuation(0.0f, 0.0f, 1.0f);
         pointLight.setAttenuation(att);
-        pointLightList[0] = pointLight;
-        GameComponent lamp = new GameComponent();
-        lamp.setPointLight(pointLight);
-        gameComponents.add(lamp);
+        pointLights.add(pointLight);
+        sceneRenderer.setPointLights(pointLights);
         
         // Spot Light - added as game component because there can be many in game with positions in the world
         // Anything with a position in the world should be a GameComponent (TODO: should it be called "SceneComponent"?)
@@ -113,10 +107,8 @@ public class DummyGame implements GameLogic {
         Vector3f coneDir = new Vector3f(0, 0, -1);
         float cutoff = (float) Math.cos(Math.toRadians(140));
         SpotLight spotLight = new SpotLight(pointLight, coneDir, cutoff);
-        spotLightList[0] = spotLight;
-        GameComponent spotLightComp = new GameComponent();
-        spotLightComp.setSpotLight(spotLight);
-        gameComponents.add(spotLightComp);
+        spotLights.add(spotLight);
+        sceneRenderer.setSpotLights(spotLights);
         
         // Ambient Light - set in scene as it is global
         ambientLight = new Vector3f(0.3f, 0.3f, 0.3f);
@@ -129,8 +121,9 @@ public class DummyGame implements GameLogic {
     	
         // Set up debug renderer
         debugRenderer = new DebugRenderer();
-        hud = new DebugText("Hi Cuddlebug");
-        debugRenderer.setHud(hud);
+        DebugText debugText = new DebugText("Hi Cuddlebug");
+        debugTexts.add(debugText);
+        debugRenderer.setHud(debugTexts);
         debugRenderer.setWindowHeightPx(window.getHeight());
         debugRenderer.setWindowWidthPx(window.getWidth());
         
@@ -156,11 +149,11 @@ public class DummyGame implements GameLogic {
         } else if (window.isKeyPressed(GLFW_KEY_X)) {
             cameraInc.y = 1;
         }
-        float lightPos = spotLightList[0].getPointLight().getPosition().z;
+        float lightPos = spotLights.get(0).getPointLight().getPosition().z;
         if (window.isKeyPressed(GLFW_KEY_N)) {
-            this.spotLightList[0].getPointLight().getPosition().z = lightPos + 0.1f;
+            this.spotLights.get(0).getPointLight().getPosition().z = lightPos + 0.1f;
         } else if (window.isKeyPressed(GLFW_KEY_M)) {
-            this.spotLightList[0].getPointLight().getPosition().z = lightPos - 0.1f;
+            this.spotLights.get(0).getPointLight().getPosition().z = lightPos - 0.1f;
         }
     }
 
