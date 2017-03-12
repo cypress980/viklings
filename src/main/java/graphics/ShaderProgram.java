@@ -1,6 +1,7 @@
 package graphics;
 
 import static org.lwjgl.opengl.GL20.*;
+import static org.lwjgl.opengl.GL11.GL_TRUE;
 
 import java.nio.FloatBuffer;
 import java.util.HashMap;
@@ -10,6 +11,23 @@ import org.joml.Matrix4f;
 import org.joml.Vector3f;
 import org.lwjgl.system.MemoryStack;
 
+import graphics.scene.DirectionalLight;
+import graphics.scene.PointLight;
+import graphics.scene.SpotLight;
+
+/** 
+ * This is a bit of a shader god class. It defines all of the interactions that you can have with 
+ * the shader program.
+ * 
+ * We are starting to split apart though - it has two separate shader programs now - the scene shaders and the
+ * hud shaders which are responsible for rendering text overlay.
+ * 
+ * At some point, I should figure out how to make this more modular, or even generate it automatically from the
+ * GLSL shader files themselves. But for now, we'll leave it as is.
+ * 
+ * @author cypress980
+ *
+ */
 public class ShaderProgram {
     private final int programId;
 
@@ -52,7 +70,7 @@ public class ShaderProgram {
 
         return shaderId;
     }
-
+    
     public void link() throws Exception {
         glLinkProgram(programId);
         if (glGetProgrami(programId, GL_LINK_STATUS) == 0) {
@@ -67,11 +85,35 @@ public class ShaderProgram {
         }
 
         glValidateProgram(programId);
-        if (glGetProgrami(programId, GL_VALIDATE_STATUS) == 0) {
+        if (glGetProgrami(programId, GL_VALIDATE_STATUS) != GL_TRUE) {
             System.err.println("Warning validating Shader code: " + glGetProgramInfoLog(programId, 1024));
         }
-
     }
+    
+    /**
+     * Install this shader program as part of the current OpenGL rendering state
+     */
+    public void bind() {
+        glUseProgram(programId);
+    }
+
+    public void unbind() {
+        glUseProgram(0);
+    }
+
+    public void cleanup() {
+        unbind();
+        if (programId != 0) {
+            glDeleteProgram(programId);
+        }
+    }
+    
+    /*\
+     * 
+     * Deal with uniforms below
+     * TODO: Move this to it's own uniform writer class
+     * 
+    \*/
     
     public void createUniform(String uniformName) throws Exception {
         int uniformLocation = glGetUniformLocation(programId, uniformName);
@@ -140,7 +182,7 @@ public class ShaderProgram {
         createUniform(uniformName + ".direction");
         createUniform(uniformName + ".intensity");
     }
-
+    
     public void setUniform(String uniformName, DirectionalLight dirLight) {
         setUniform(uniformName + ".color", dirLight.getColor() );
         setUniform(uniformName + ".direction", dirLight.getDirection());
@@ -189,23 +231,5 @@ public class ShaderProgram {
 
     public void setUniform(String uniformName, SpotLight spotLight, int pos) {
         setUniform(uniformName + "[" + pos + "]", spotLight);
-    }
-    
-    /**
-     * Install this shader program as part of the current OpenGL rendering state
-     */
-    public void bind() {
-        glUseProgram(programId);
-    }
-
-    public void unbind() {
-        glUseProgram(0);
-    }
-
-    public void cleanup() {
-        unbind();
-        if (programId != 0) {
-            glDeleteProgram(programId);
-        }
     }
 }

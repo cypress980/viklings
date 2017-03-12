@@ -1,4 +1,4 @@
-package graphics;
+package graphics.scene;
 
 import org.joml.Vector3f;
 

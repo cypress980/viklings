@@ -1,7 +1,14 @@
-package graphics;
+package graphics.scene;
 
 import org.joml.Vector3f;
 
+/**
+ * Camera encapsulates position and direction in a way that can easily
+ * be used to translate the model world view coordinates in the vertex scene shader.
+ * 
+ * @author cypress980
+ *
+ */
 public class Camera {
 
     private final Vector3f position;
