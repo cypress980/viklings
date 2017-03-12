@@ -36,12 +36,6 @@ public class SceneRenderer implements Renderer {
         modelViewMatrix = new Matrix4f();
         viewMatrix = new Matrix4f();
     }
-
-    //TODO: Move this to Graphics Engine - we should clear before all renderers run, not just before this one - though 
-    // this one *should* probably always be first.
-    public void clear() {
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    }
     
     // Scene can be anything, but we'll make the game components implement SceneRenderable.
     // This way a reference to the game state, stored as a component hierarchy can be rendered without 
@@ -70,7 +64,7 @@ public class SceneRenderer implements Renderer {
         sceneShaderProgram.createVertexShader(resLoader.loadToString("shaders/vertex.vs"));
         sceneShaderProgram.createFragmentShader(resLoader.loadToString("shaders/fragment.fs"));
         sceneShaderProgram.link();
-
+        
         // Create uniforms for modelView and projection matrices and texture
         sceneShaderProgram.createUniform("projectionMatrix");
         sceneShaderProgram.createUniform("modelViewMatrix");
@@ -95,9 +89,6 @@ public class SceneRenderer implements Renderer {
 
     @Override
     public void render() {
-	
-	clear();
-	
 	int spotLights = 0;
 	int pointLights = 0;
 	

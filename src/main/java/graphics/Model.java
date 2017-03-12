@@ -22,11 +22,11 @@ public class Model {
     private Material material;
 
     public Model(float[] positions, float[] textCoords, float[] normals, int[] indices) {
-	FloatBuffer posBuffer = null;
+	FloatBuffer coordBuffer = null;
 	FloatBuffer textCoordsBuffer = null;
 	FloatBuffer vecNormalsBuffer = null;
 	IntBuffer indicesBuffer = null;
-
+	
 	try {
 	    vertexCount = indices.length;
 	    vboIdList = new ArrayList<>();
@@ -34,13 +34,13 @@ public class Model {
 	    vaoId = glGenVertexArrays();
 	    glBindVertexArray(vaoId);
 
-	    // Position VBO
+	    // Coordinate VBO
 	    int vboId = glGenBuffers();
 	    vboIdList.add(vboId);
-	    posBuffer = MemoryUtil.memAllocFloat(positions.length);
-	    posBuffer.put(positions).flip();
+	    coordBuffer = MemoryUtil.memAllocFloat(positions.length);
+	    coordBuffer.put(positions).flip();
 	    glBindBuffer(GL_ARRAY_BUFFER, vboId);
-	    glBufferData(GL_ARRAY_BUFFER, posBuffer, GL_STATIC_DRAW);
+	    glBufferData(GL_ARRAY_BUFFER, coordBuffer, GL_STATIC_DRAW);
 	    glVertexAttribPointer(0, 3, GL_FLOAT, false, 0, 0);
 
 	    // Texture coordinates VBO
@@ -72,8 +72,8 @@ public class Model {
 	    glBindBuffer(GL_ARRAY_BUFFER, 0);
 	    glBindVertexArray(0);
 	} finally {
-	    if (posBuffer != null) {
-		MemoryUtil.memFree(posBuffer);
+	    if (coordBuffer != null) {
+		MemoryUtil.memFree(coordBuffer);
 	    }
 	    if (textCoordsBuffer != null) {
 		MemoryUtil.memFree(textCoordsBuffer);
