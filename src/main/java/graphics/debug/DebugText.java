@@ -4,9 +4,8 @@ import org.joml.Vector3f;
 
 import engine.GamePosition;
 import engine.GameWindow;
-import engine.TextItem;
 
-public class TextHud implements Hud {
+public class DebugText implements DebugRenderable {
 
     private static final int FONT_COLS = 16;
     
@@ -18,9 +17,9 @@ public class TextHud implements Hud {
 
     private final TextItem statusTextItem;
 
-    public TextHud(String statusText) throws Exception {
+    public DebugText(String statusText) throws Exception {
         this.statusTextItem = new TextItem(statusText, FONT_TEXTURE, FONT_COLS, FONT_ROWS);
-        this.statusTextItem.getMesh().getMaterial().setColor(new Vector3f(1, 1, 1));
+        this.statusTextItem.getModel().getMaterial().setColor(new Vector3f(1, 1, 1));
         gameItems = new GamePosition[]{statusTextItem};
     }
 

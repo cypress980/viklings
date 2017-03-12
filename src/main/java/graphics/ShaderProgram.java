@@ -1,4 +1,4 @@
-package graphics.scene;
+package graphics;
 
 import static org.lwjgl.opengl.GL20.*;
 import static org.lwjgl.opengl.GL11.GL_TRUE;
@@ -11,7 +11,10 @@ import org.joml.Matrix4f;
 import org.joml.Vector3f;
 import org.lwjgl.system.MemoryStack;
 
-import graphics.Material;
+import graphics.scene.DirectionalLight;
+import graphics.scene.PointLight;
+import graphics.scene.SpotLight;
+import graphics.scene.PointLight.Attenuation;
 
 public class ShaderProgram {
     private final int programId;

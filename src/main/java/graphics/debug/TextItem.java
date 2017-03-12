@@ -1,10 +1,11 @@
-package engine;
+package graphics.debug;
 
 import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Stream;
 
+import engine.GamePosition;
 import graphics.Material;
 import graphics.Model;
 import graphics.Texture;
@@ -27,7 +28,7 @@ public class TextItem extends GamePosition {
         this.numCols = numCols;
         this.numRows = numRows;
         Texture texture = new Texture(fontFileName);
-        this.setMesh(buildMesh(texture, numCols, numRows));
+        this.setModel(buildMesh(texture, numCols, numRows));
     }
 
     private Model buildMesh(Texture texture, int numCols, int numRows) {
@@ -108,8 +109,8 @@ public class TextItem extends GamePosition {
     
     public void setText(String text) {
         this.text = text;
-        Texture texture = this.getMesh().getMaterial().getTexture();
-        this.getMesh().deleteBuffers();
-        this.setMesh(buildMesh(texture, numCols, numRows));
+        Texture texture = this.getModel().getMaterial().getTexture();
+        this.getModel().deleteBuffers();
+        this.setModel(buildMesh(texture, numCols, numRows));
     }
 }

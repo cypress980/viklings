@@ -4,16 +4,19 @@ import org.joml.Vector2f;
 import org.joml.Vector3f;
 
 import engine.GamePosition;
+import engine.GameComponent;
 import engine.GameLogic;
 import engine.GameWindow;
 import engine.MouseInput;
+import graphics.GraphicsEngine;
 import graphics.Material;
 import graphics.Model;
 import graphics.ObjLoader;
 import graphics.Renderer;
 import graphics.Texture;
-import graphics.debug.Hud;
-import graphics.debug.TextHud;
+import graphics.debug.DebugRenderer;
+import graphics.debug.DebugRenderable;
+import graphics.debug.DebugText;
 import graphics.scene.Camera;
 import graphics.scene.DirectionalLight;
 import graphics.scene.PointLight;
@@ -23,6 +26,7 @@ import graphics.scene.SpotLight;
 import static org.lwjgl.glfw.GLFW.*;
 
 import java.util.ArrayList;
+import java.util.Collection;
 
 
 public class DummyGame implements GameLogic {
@@ -31,66 +35,77 @@ public class DummyGame implements GameLogic {
 
     private final Vector3f cameraInc;
 
-    private final SceneRenderer renderer;
-
+    private SceneRenderer sceneRenderer;
+    
+    private DebugRenderer debugRenderer;
+    
     private final Camera camera;
-
-    private GamePosition[] gameItems;
+    
+    private final Collection<GameComponent> gameComponents;
 
     private Vector3f ambientLight;
 
-	private float lightAngle;
+    private float lightAngle;
 
-    private PointLight[] pointLightList;
+    private PointLight[] pointLightList = new PointLight[5];
 
-    private SpotLight[] spotLightList;
+    private SpotLight[] spotLightList = new SpotLight[5];
+
+    private DirectionalLight directionalLight;
     
-    private float spotAngle = 0;
+    private GraphicsEngine graphicsEngine;
 
-    private float spotInc = 1;
-    
-	private DirectionalLight directionalLight;
-
-	private Hud hud;
+    private DebugText hud;
 
     private static final float CAMERA_POS_STEP = 0.05f;
 
     public DummyGame() {
-        renderer = new SceneRenderer();
+	gameComponents = new ArrayList<>();
         camera = new Camera();
         cameraInc = new Vector3f(0.0f, 0.0f, 0.0f);
+        graphicsEngine = new GraphicsEngine();
     }
 
     @Override
     public void init(GameWindow window) throws Exception {
-        renderer.init(window);
+	// Set up scene renderer
+        sceneRenderer = new SceneRenderer();
+        sceneRenderer.setCamera(camera);
+        sceneRenderer.setWindowHeightPx(window.getHeight());
+        sceneRenderer.setWindowWidthPx(window.getWidth());
+        sceneRenderer.setScene(gameComponents);
 
+        //Set up objects in scene
         float reflectance = 1f;
-        //Mesh mesh = OBJLoader.loadMesh("/models/bunny.obj");
-        //Material material = new Material(new Vector3f(0.2f, 0.5f, 0.5f), reflectance);
         ObjLoader meshMaker = new ObjLoader();
-        Model mesh = meshMaker.loadMesh("models/cube.obj");
+        Model cube = meshMaker.loadMesh("models/cube.obj");
         Texture texture = new Texture("textures/grassblock.png");
         Material material = new Material(texture, reflectance);
-
-        mesh.setMaterial(material);
-        GamePosition gameItem = new GamePosition(mesh);
-        gameItem.setScale(0.5f);
-        gameItem.setPosition(0, 0, -2);
-        gameItems = new GamePosition[]{gameItem};
-
-        // Ambient Light
-        ambientLight = new Vector3f(0.3f, 0.3f, 0.3f);
-
+        
+        cube.setMaterial(material);
+        GamePosition position = new GamePosition(cube);
+        position.setScale(0.5f);
+        position.setPosition(0, 0, -2);
+        
+        GameComponent grassblock = new GameComponent();
+        grassblock.setModel(cube);
+        grassblock.setPosition(position);
+        
+        gameComponents.add(grassblock);
+        
         // Point Light
         Vector3f lightPosition = new Vector3f(0, 0, 1);
         float lightIntensity = 1.0f;
         PointLight pointLight = new PointLight(new Vector3f(1, 1, 1), lightPosition, lightIntensity);
         PointLight.Attenuation att = new PointLight.Attenuation(0.0f, 0.0f, 1.0f);
         pointLight.setAttenuation(att);
-        pointLightList = new PointLight[]{pointLight};
-
-        // Spot Light
+        pointLightList[0] = pointLight;
+        GameComponent lamp = new GameComponent();
+        lamp.setPointLight(pointLight);
+        gameComponents.add(lamp);
+        
+        // Spot Light - added as game component because there can be many in game with positions in the world
+        // Anything with a position in the world should be a GameComponent (TODO: should it be called "SceneComponent"?)
         lightPosition = new Vector3f(0, 0.0f, 10f);
         pointLight = new PointLight(new Vector3f(1, 1, 1), lightPosition, lightIntensity);
         att = new PointLight.Attenuation(0.0f, 0.0f, 0.02f);
@@ -98,14 +113,29 @@ public class DummyGame implements GameLogic {
         Vector3f coneDir = new Vector3f(0, 0, -1);
         float cutoff = (float) Math.cos(Math.toRadians(140));
         SpotLight spotLight = new SpotLight(pointLight, coneDir, cutoff);
-        spotLightList = new SpotLight[]{spotLight, new SpotLight(spotLight)};
+        spotLightList[0] = spotLight;
+        GameComponent spotLightComp = new GameComponent();
+        spotLightComp.setSpotLight(spotLight);
+        gameComponents.add(spotLightComp);
         
-        // Directional Light
+        // Ambient Light - set in scene as it is global
+        ambientLight = new Vector3f(0.3f, 0.3f, 0.3f);
+        sceneRenderer.setAmbientLight(ambientLight);
+        
+        // Directional Light - set in scene as it is global
         lightPosition = new Vector3f(-1, 0, 0);
         directionalLight = new DirectionalLight(new Vector3f(1, 1, 1), lightPosition, lightIntensity);
+        sceneRenderer.setDirectionalLight(directionalLight);
+    	
+        // Set up debug renderer
+        debugRenderer = new DebugRenderer();
+        hud = new DebugText("Hi Cuddlebug");
+        debugRenderer.setHud(hud);
+        debugRenderer.setWindowHeightPx(window.getHeight());
+        debugRenderer.setWindowWidthPx(window.getWidth());
         
-        // Create HUD
-        hud = new TextHud("HI CUDDLEBUG");
+        graphicsEngine.addRenderer(sceneRenderer);
+        graphicsEngine.addRenderer(debugRenderer);
     }
 
     @Override
@@ -167,18 +197,20 @@ public class DummyGame implements GameLogic {
         directionalLight.getDirection().x = (float) Math.sin(angRad);
         directionalLight.getDirection().y = (float) Math.cos(angRad);
     }
-
+    
     @Override
     public void render(GameWindow window) {
-        renderer.render(window, camera, gameItems, ambientLight, pointLightList, 
-        		spotLightList, directionalLight, hud);
+        graphicsEngine.render();
     }
 
     @Override
     public void cleanup() {
-        renderer.cleanup();
-        for (GamePosition gameItem : gameItems) {
-            gameItem.getMesh().cleanUp();
+        graphicsEngine.removeRenderer(debugRenderer);
+        graphicsEngine.removeRenderer(sceneRenderer);
+        for (GameComponent item : gameComponents) {
+            if (item.getModel() != null) {
+        	item.getModel().cleanUp();
+            }
         }
     }
 
