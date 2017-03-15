@@ -1,7 +1,7 @@
 package graphics.debug;
 
 import graphics.Position;
-import graphics.Model;
+import graphics.core.Model;
 
 public interface DebugRenderable {
     Model getModel();

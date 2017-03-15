@@ -1,4 +1,4 @@
-package graphics;
+package graphics.core;
 
 import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
@@ -11,6 +11,14 @@ import static org.lwjgl.opengl.GL20.*;
 import static org.lwjgl.opengl.GL30.*;
 import org.lwjgl.system.MemoryUtil;
 
+import graphics.Material;
+
+/**
+ * This class loads the model into openGL land
+ * 
+ * @author cypress980
+ *
+ */
 public class Model {
 
     private final int vaoId;
@@ -111,7 +119,7 @@ public class Model {
 	    // Bind the texture
 	    glBindTexture(GL_TEXTURE_2D, texture.getId());
 	}
-
+	
 	// Draw the mesh
 	glBindVertexArray(getVaoId());
 	glEnableVertexAttribArray(0);

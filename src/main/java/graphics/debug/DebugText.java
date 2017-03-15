@@ -4,7 +4,7 @@ import org.joml.Vector3f;
 
 import engine.GameWindow;
 import graphics.Position;
-import graphics.Model;
+import graphics.core.Model;
 
 /**
  * Simple wrapper for text item with default font

@@ -1,4 +1,4 @@
-package graphics;
+package graphics.core;
 
 import static org.lwjgl.opengl.GL20.*;
 import static org.lwjgl.opengl.GL11.GL_TRUE;
@@ -11,9 +11,10 @@ import org.joml.Matrix4f;
 import org.joml.Vector3f;
 import org.lwjgl.system.MemoryStack;
 
-import graphics.scene.DirectionalLight;
-import graphics.scene.PointLight;
-import graphics.scene.SpotLight;
+import graphics.Material;
+import graphics.core.scene.DirectionalLight;
+import graphics.core.scene.PointLight;
+import graphics.core.scene.SpotLight;
 
 /** 
  * This is a bit of a shader god class. It defines all of the interactions that you can have with 

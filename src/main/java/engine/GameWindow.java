@@ -18,11 +18,11 @@ public class GameWindow {
     private int height;
 
     private long windowHandle;
-
+    
     private GLFWErrorCallback errorCallback;
-
+    
     private GLFWKeyCallback keyCallback;
-
+    
     private GLFWWindowSizeCallback windowSizeCallback;
 
     private boolean resized;
@@ -40,7 +40,8 @@ public class GameWindow {
     public void init() {
         // Setup an error callback. The default implementation
         // will print the error message in System.err.
-        glfwSetErrorCallback(errorCallback = GLFWErrorCallback.createPrint(System.err));
+	errorCallback = GLFWErrorCallback.createPrint(System.err);
+        glfwSetErrorCallback(errorCallback);
 
         // Initialize GLFW. Most GLFW functions will not work before doing this.
         if (!glfwInit()) {
@@ -62,24 +63,28 @@ public class GameWindow {
         }
 
         // Setup resize callback
-        glfwSetWindowSizeCallback(windowHandle, windowSizeCallback = new GLFWWindowSizeCallback() {
+        windowSizeCallback = new GLFWWindowSizeCallback() {
             @Override
             public void invoke(long window, int width, int height) {
                 GameWindow.this.width = width;
                 GameWindow.this.height = height;
                 GameWindow.this.setResized(true);
             }
-        });
+        };
+        
+        glfwSetWindowSizeCallback(windowHandle, windowSizeCallback);
 
         // Setup a key callback. It will be called every time a key is pressed, repeated or released.
-        glfwSetKeyCallback(windowHandle, keyCallback = new GLFWKeyCallback() {
+        keyCallback = new GLFWKeyCallback() {
             @Override
             public void invoke(long window, int key, int scancode, int action, int mods) {
                 if (key == GLFW_KEY_ESCAPE && action == GLFW_RELEASE) {
                     glfwSetWindowShouldClose(window, true);
                 }
             }
-        });
+        };
+        
+        glfwSetKeyCallback(windowHandle, keyCallback);
 
         // Get the resolution of the primary monitor
         GLFWVidMode vidmode = glfwGetVideoMode(glfwGetPrimaryMonitor());

@@ -6,10 +6,10 @@ import org.joml.Matrix4f;
 import org.joml.Vector3f;
 
 import graphics.Position;
-import graphics.Model;
 import graphics.Renderer;
 import graphics.ResourceLoader;
-import graphics.ShaderProgram;
+import graphics.core.Model;
+import graphics.core.ShaderProgram;
 import graphics.debug.DebugRenderable;
 
 public class DebugRenderer implements Renderer {

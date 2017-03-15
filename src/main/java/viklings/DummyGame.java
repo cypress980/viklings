@@ -3,34 +3,38 @@ package viklings;
 import org.joml.Vector2f;
 import org.joml.Vector3f;
 
-import engine.GameComponent;
 import engine.GameLogic;
 import engine.GameWindow;
 import engine.MouseInput;
+import engine.game.state.GameComponent;
 import graphics.Position;
 import graphics.GraphicsEngine;
 import graphics.Material;
-import graphics.Model;
 import graphics.ObjLoader;
-import graphics.Texture;
+import graphics.core.Model;
+import graphics.core.Texture;
+import graphics.core.scene.Camera;
+import graphics.core.scene.DirectionalLight;
+import graphics.core.scene.PointLight;
+import graphics.core.scene.SceneRenderer;
+import graphics.core.scene.SpotLight;
 import graphics.debug.DebugRenderer;
 import graphics.debug.DebugText;
-import graphics.scene.Camera;
-import graphics.scene.DirectionalLight;
-import graphics.scene.PointLight;
-import graphics.scene.SceneRenderer;
-import graphics.scene.SpotLight;
 
 import static org.lwjgl.glfw.GLFW.*;
 
 import java.util.List;
+import java.util.Map;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 
 
 public class DummyGame implements GameLogic {
 
     private static final float MOUSE_SENSITIVITY = 0.2f;
+    
+    private static final float CAMERA_POS_STEP = 0.05f;
 
     private final Vector3f cameraInc;
 
@@ -40,7 +44,7 @@ public class DummyGame implements GameLogic {
     
     private final Camera camera;
     
-    private final Collection<GameComponent> gameComponents;
+    private final Map<GameComponent, Model> gameComponents;
 
     private Vector3f ambientLight;
 
@@ -56,15 +60,33 @@ public class DummyGame implements GameLogic {
 
     private List<DebugText> debugTexts = new ArrayList<>();;
 
-    private static final float CAMERA_POS_STEP = 0.05f;
-
+    private final ObjLoader meshMaker = new ObjLoader();
+    
     public DummyGame() {
-	gameComponents = new ArrayList<>();
+	gameComponents = new HashMap<>();
         camera = new Camera();
         cameraInc = new Vector3f(0.0f, 0.0f, 0.0f);
         graphicsEngine = new GraphicsEngine();
     }
 
+    //TODO: Let's create a scene class, that will be responsible for managing the tying together
+    // of game state and openGL state
+    private void addGameComponentToScene(GameComponent component) throws Exception {
+	Model model = meshMaker.loadMesh(component.getModelFile());
+	Texture texture = new Texture(component.getTextureFile());
+	float reflectance = 1f; //TODO: add material definition to GameComponent
+	Material material = new Material(texture, reflectance);
+	model.setMaterial(material);
+	//Once model is defined, add renderable and it's model to the scene
+	gameComponents.put(component, model);
+    }
+    
+    private void removeGameComponentFromScene(GameComponent component) {
+	Model model = gameComponents.get(component);
+	model.cleanUp();
+	gameComponents.remove(component);
+    }
+    
     @Override
     public void init(GameWindow window) throws Exception {
 	// Set up scene renderer
@@ -75,19 +97,13 @@ public class DummyGame implements GameLogic {
         sceneRenderer.setScene(gameComponents);
 
         //Set up objects in scene
-        ObjLoader meshMaker = new ObjLoader();
-        GameComponent grassblock = new GameComponent();
+        
+        GameComponent grassblock = new GameComponent("models/cube.obj", "textures/grassblock.png");
         Position position = new Position();
         position.setScale(0.5f);
-        position.setPosition(0, 0, -2);
-        Model cube = meshMaker.loadMesh("models/cube.obj");
-        Texture texture = new Texture("textures/grassblock.png");
-        float reflectance = 1f;
-        Material material = new Material(texture, reflectance);
-        cube.setMaterial(material);
-        grassblock.setModel(cube);
+        position.setCoordinates(0, 0, -2);
         grassblock.setPosition(position);
-        gameComponents.add(grassblock);
+        addGameComponentToScene(grassblock);
         
         // Point Light
         Vector3f lightPosition = new Vector3f(0, 0, 1);
@@ -200,10 +216,8 @@ public class DummyGame implements GameLogic {
     public void cleanup() {
         graphicsEngine.removeRenderer(debugRenderer);
         graphicsEngine.removeRenderer(sceneRenderer);
-        for (GameComponent item : gameComponents) {
-            if (item.getModel() != null) {
-        	item.getModel().cleanUp();
-            }
+        for (Model model : gameComponents.values()) {
+            model.cleanUp();
         }
     }
 

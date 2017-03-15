@@ -40,26 +40,34 @@ public class MouseInput {
     }
 
     public void init(GameWindow window) {
-        glfwSetCursorPosCallback(window.getWindowHandle(), cursorPosCallback = new GLFWCursorPosCallback() {
+	cursorPosCallback = new GLFWCursorPosCallback() {
             @Override
             public void invoke(long window, double xpos, double ypos) {
                 currentPos.x = xpos;
                 currentPos.y = ypos;
             }
-        });
-        glfwSetCursorEnterCallback(window.getWindowHandle(), cursorEnterCallback = new GLFWCursorEnterCallback() {
+        };
+	
+        glfwSetCursorPosCallback(window.getWindowHandle(), cursorPosCallback);
+        
+        cursorEnterCallback = new GLFWCursorEnterCallback() {
             @Override
             public void invoke(long window, boolean entered) {
                 inWindow = entered;
             }
-        });
-        glfwSetMouseButtonCallback(window.getWindowHandle(), mouseButtonCallback = new GLFWMouseButtonCallback() {
+        };
+        
+        glfwSetCursorEnterCallback(window.getWindowHandle(), cursorEnterCallback);
+        
+        mouseButtonCallback = new GLFWMouseButtonCallback() {
             @Override
             public void invoke(long window, int button, int action, int mods) {
                 leftButtonPressed = button == GLFW_MOUSE_BUTTON_1 && action == GLFW_PRESS;
                 rightButtonPressed = button == GLFW_MOUSE_BUTTON_2 && action == GLFW_PRESS;
             }
-        });
+        };
+        
+        glfwSetMouseButtonCallback(window.getWindowHandle(), mouseButtonCallback);
     }
 
     public Vector2f getDisplVec() {

@@ -4,26 +4,26 @@ import org.joml.Vector3f;
 
 public class Position {
 
-    private final Vector3f position;
+    private final Vector3f coordinates;
 
     private float scale;
 
     private final Vector3f rotation;
 
     public Position() {
-	position = new Vector3f(0, 0, 0);
+	coordinates = new Vector3f(0, 0, 0);
 	scale = 1;
 	rotation = new Vector3f(0, 0, 0);
     }
     
     public Vector3f getPosition() {
-	return position;
+	return coordinates;
     }
     
-    public void setPosition(float x, float y, float z) {
-	this.position.x = x;
-	this.position.y = y;
-	this.position.z = z;
+    public void setCoordinates(float x, float y, float z) {
+	this.coordinates.x = x;
+	this.coordinates.y = y;
+	this.coordinates.z = z;
     }
     
     public float getScale() {

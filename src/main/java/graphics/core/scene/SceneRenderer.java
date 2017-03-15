@@ -1,17 +1,17 @@
-package graphics.scene;
+package graphics.core.scene;
 
 import org.joml.Matrix4f;
 import org.joml.Vector3f;
 import org.joml.Vector4f;
 
 import graphics.Position;
-import graphics.Model;
 import graphics.Renderer;
 import graphics.ResourceLoader;
-import graphics.ShaderProgram;
-import static org.lwjgl.opengl.GL11.*;
+import graphics.core.Model;
+import graphics.core.ShaderProgram;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Collection;
 
 public class SceneRenderer implements Renderer {
@@ -24,23 +24,17 @@ public class SceneRenderer implements Renderer {
     private static final float Z_FAR = 1000.f;
     private static final int MAX_POINT_LIGHTS = 5;
     private static final int MAX_SPOT_LIGHTS = 5;
-    private ShaderProgram sceneShaderProgram;
+    
     private final float specularPower;
     private final Matrix4f projectionMatrix;
     private final Matrix4f modelViewMatrix;
     private final Matrix4f viewMatrix;
-    
-    public SceneRenderer() {
-        specularPower = 10f;
-        projectionMatrix = new Matrix4f();
-        modelViewMatrix = new Matrix4f();
-        viewMatrix = new Matrix4f();
-    }
-    
     // Scene can be anything, but we'll make the game components implement SceneRenderable.
     // This way a reference to the game state, stored as a component hierarchy can be rendered without 
     // further manipulation.
-    private Collection<? extends SceneRenderable> scene;
+    private Map<? extends SceneRenderable, Model> scene;
+    
+    private ShaderProgram sceneShaderProgram;
     
     // Camera is a reference to the game camera. It contains world coordinate information that is used
     // to translate the world coordinates to screen coordinates
@@ -55,6 +49,13 @@ public class SceneRenderer implements Renderer {
     private DirectionalLight directionalLight;
     private List<PointLight> pointLights;
     private List<SpotLight> spotLights;
+    
+    public SceneRenderer() {
+        specularPower = 10f;
+        projectionMatrix = new Matrix4f();
+        modelViewMatrix = new Matrix4f();
+        viewMatrix = new Matrix4f();
+    }
     
     @Override
     public void loadShaders() throws Exception {
@@ -118,9 +119,9 @@ public class SceneRenderer implements Renderer {
 	}
 	
 	// Render Scene
-	for (SceneRenderable thing : scene) {
-	    render(thing, viewMatrix);
-	}
+	scene.forEach((renderable, model)->{
+		render(model, renderable.getPosition(), viewMatrix);
+	});
 	
 	sceneShaderProgram.unbind();
     }
@@ -132,7 +133,7 @@ public class SceneRenderer implements Renderer {
         }
     }
     
-    public void setScene(Collection<? extends SceneRenderable> scene) {
+    public void setScene(Map<? extends SceneRenderable, Model> scene) {
 	this.scene = scene;
     }
     
@@ -197,15 +198,10 @@ public class SceneRenderer implements Renderer {
         sceneShaderProgram.setUniform("spotLights", currSpotLight, index);
     }
     
-    private void render(SceneRenderable thing, Matrix4f viewMatrix) {
+    private void render(Model model, Position position, Matrix4f viewMatrix) {
         sceneShaderProgram.setUniform("texture_sampler", 0);
-        // Render each gameItem
-        Model model = thing.getModel();
-        if (model == null) {
-            return; //Nothing to do
-        }
         // Set model view matrix for this item
-        Matrix4f modelViewMatrix = getModelViewMatrix(thing.getPosition(), viewMatrix);
+        Matrix4f modelViewMatrix = getModelViewMatrix(position, viewMatrix);
         sceneShaderProgram.setUniform("modelViewMatrix", modelViewMatrix);
         // Render the mesh for this game item
         sceneShaderProgram.setUniform("material", model.getMaterial());

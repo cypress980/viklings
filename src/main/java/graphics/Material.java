@@ -2,6 +2,8 @@ package graphics;
 
 import org.joml.Vector3f;
 
+import graphics.core.Texture;
+
 public class Material {
 
     private static final Vector3f DEFAULT_COLOUR = new Vector3f(1.0f, 1.0f, 1.0f);

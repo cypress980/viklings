@@ -3,13 +3,11 @@ package graphics.debug;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Stream;
 
-import engine.GameComponent;
 import graphics.Position;
 import graphics.Material;
-import graphics.Model;
-import graphics.Texture;
+import graphics.core.Model;
+import graphics.core.Texture;
 
 public class TextItem implements DebugRenderable {
 
@@ -119,9 +117,9 @@ public class TextItem implements DebugRenderable {
         model.deleteBuffers();
         model = buildMesh(texture, numCols, numRows);
     }
-
+    
     public void setPosition(float x, float y) {
-        this.position.setPosition(x, y, 0);
+        this.position.setCoordinates(x, y, 0);
     }
     
     public Model getModel() {
