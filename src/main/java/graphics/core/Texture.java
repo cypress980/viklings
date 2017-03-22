@@ -14,10 +14,15 @@ public class Texture {
     private final int width;
 
     private final int height;
-
+    
+    //TODO: in text items we need to know the h/w to map the texture to the model
+    // The model takes a texture file name, and binds it itself. So, what we do is
+    // we create and bind texture here, then we create the model, then we create and bind the model again
+    // I want to have a clean interface from the core for how to bind state to openGL, and that is not clean.
+    // Not sure quite the best fix, but I should fix it.
     public Texture(String fileName) throws Exception {
         // Load Texture file
-		ClassLoader classLoader = Texture.class.getClassLoader();
+	ClassLoader classLoader = Texture.class.getClassLoader();
         PNGDecoder decoder = new PNGDecoder(classLoader.getResourceAsStream(fileName));
         
         // Load texture contents into a byte buffer

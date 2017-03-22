@@ -11,7 +11,7 @@ import org.joml.Matrix4f;
 import org.joml.Vector3f;
 import org.lwjgl.system.MemoryStack;
 
-import graphics.Material;
+import engine.game.state.Material;
 import graphics.core.scene.DirectionalLight;
 import graphics.core.scene.PointLight;
 import graphics.core.scene.SpotLight;

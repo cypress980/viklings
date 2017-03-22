@@ -1,9 +1,8 @@
 package engine.game.state;
 
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
-
-import graphics.Position;
 
 public class GameComponentByteArraySerDeTest {
     
@@ -12,7 +11,9 @@ public class GameComponentByteArraySerDeTest {
     
     @Before
     public void setupGameComponent() throws Exception {
-        GameComponent grassblock = new GameComponent("models/cube.obj", "textures/grassblock.png");
+	float grassReflectance = 0.8f;
+	Material grass = new Material("textures/grassblock.png", grassReflectance);
+        grassblock = new GameComponent("models/cube.obj", grass);
         Position position = new Position();
         position.setScale(0.5f);
         position.setCoordinates(0, 0, -2);
@@ -20,7 +21,10 @@ public class GameComponentByteArraySerDeTest {
     }
     
     @Test
-    public void testSerialize() throws Exception {
-	System.out.println(serDe.serialize(grassblock));
+    public void testSerDe() throws Exception {
+	byte[] componentBytes = serDe.serialize(grassblock);
+	GameComponent grassblockPhoenix = serDe.deserialize(componentBytes);
+	
+	Assert.assertEquals(grassblock, grassblockPhoenix);
     }
 }

@@ -4,7 +4,7 @@ import org.joml.Matrix4f;
 import org.joml.Vector3f;
 import org.joml.Vector4f;
 
-import graphics.Position;
+import engine.game.state.Position;
 import graphics.Renderer;
 import graphics.ResourceLoader;
 import graphics.core.Model;
@@ -12,8 +12,13 @@ import graphics.core.ShaderProgram;
 
 import java.util.List;
 import java.util.Map;
-import java.util.Collection;
 
+/**
+ * TODO: This class should have three things: a shader program, a scene, and a camera
+ * 
+ * @author cypress980
+ *
+ */
 public class SceneRenderer implements Renderer {
 
     /**
@@ -33,6 +38,8 @@ public class SceneRenderer implements Renderer {
     // This way a reference to the game state, stored as a component hierarchy can be rendered without 
     // further manipulation.
     private Map<? extends SceneRenderable, Model> scene;
+    
+    private SceneRenderable skyBox;
     
     private ShaderProgram sceneShaderProgram;
     
@@ -57,6 +64,7 @@ public class SceneRenderer implements Renderer {
         viewMatrix = new Matrix4f();
     }
     
+    //TODO: this should all go in the Shader class
     @Override
     public void loadShaders() throws Exception {
         // Create shader
@@ -80,12 +88,17 @@ public class SceneRenderer implements Renderer {
         sceneShaderProgram.createDirectionalLightUniform("directionalLight");
     }
     
+    //Move to scene class
     public void setPointLights(List<PointLight> pointLights) {
 	this.pointLights = pointLights;
     }
     
     public void setSpotLights(List<SpotLight> spotLights) {
 	this.spotLights = spotLights;
+    }
+    
+    public void setSkyBox(SceneRenderable skyBox) {
+	this.skyBox = skyBox;
     }
 
     @Override
@@ -231,7 +244,7 @@ public class SceneRenderer implements Renderer {
     }
 
     private Matrix4f getModelViewMatrix(Position gameItem, Matrix4f viewMatrix) {
-        modelViewMatrix.identity().translate(gameItem.getPosition()).
+        modelViewMatrix.identity().translate(gameItem.getCoordinates()).
                 rotateX((float)Math.toRadians(-gameItem.getRotation().x)).
                 rotateY((float)Math.toRadians(-gameItem.getRotation().y)).
                 rotateZ((float)Math.toRadians(-gameItem.getRotation().z)).

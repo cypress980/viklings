@@ -11,7 +11,7 @@ import static org.lwjgl.opengl.GL20.*;
 import static org.lwjgl.opengl.GL30.*;
 import org.lwjgl.system.MemoryUtil;
 
-import graphics.Material;
+import engine.game.state.Material;
 
 /**
  * This class loads the model into openGL land
@@ -28,6 +28,8 @@ public class Model {
     private final int vertexCount;
 
     private Material material;
+    
+    private Texture texture;
 
     public Model(float[] positions, float[] textCoords, float[] normals, int[] indices) {
 	FloatBuffer coordBuffer = null;
@@ -98,11 +100,17 @@ public class Model {
     public Material getMaterial() {
 	return material;
     }
-
-    public void setMaterial(Material material) {
-	this.material = material;
+    
+    //TODO: This here is a bit of a mess - trying to do too much
+    public Texture getTexture() {
+	return texture;
     }
-
+    
+    public void setMaterialAndBindTexture(Material material) throws Exception {
+	this.material = material;
+	this.texture = new Texture(material.getTextureFile());
+    }
+    
     public int getVaoId() {
 	return vaoId;
     }
@@ -112,7 +120,6 @@ public class Model {
     }
 
     public void render() {
-	Texture texture = material.getTexture();
 	if (texture != null) {
 	    // Activate first texture bank
 	    glActiveTexture(GL_TEXTURE0);
@@ -146,7 +153,6 @@ public class Model {
 	}
 
 	// Delete the texture
-	Texture texture = material.getTexture();
 	if (texture != null) {
 	    texture.cleanup();
 	}

@@ -1,10 +1,10 @@
 package graphics.core.scene;
 
-import graphics.Position;
-import graphics.core.Model;
+import engine.game.state.Material;
+import engine.game.state.Position;
 
 public interface SceneRenderable {
     String getModelFile();
-    String getTextureFile();
+    Material getMaterial();
     Position getPosition();
 }

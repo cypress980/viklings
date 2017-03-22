@@ -1,9 +1,8 @@
 package engine.game.state;
 
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
-
-import graphics.Position;
 
 public class GameComponentJsonSerDeTest {
     private GameComponentJsonSerDe serDe = new GameComponentJsonSerDe();
@@ -11,7 +10,9 @@ public class GameComponentJsonSerDeTest {
     
     @Before
     public void setupGameComponent() throws Exception {
-        grassblock = new GameComponent("models/cube.obj", "textures/grassblock.png");
+	float grassReflectance = 0.8f;
+	Material grass = new Material("textures/grassblock.png", grassReflectance);
+        grassblock = new GameComponent("models/cube.obj", grass);
         Position position = new Position();
         position.setScale(0.5f);
         position.setCoordinates(0, 0, -2);
@@ -19,7 +20,10 @@ public class GameComponentJsonSerDeTest {
     }
     
     @Test
-    public void testSerialize() throws Exception {
-	System.out.println(serDe.serialize(grassblock));
+    public void testSerDe() throws Exception {
+	String json = serDe.serialize(grassblock);
+	GameComponent grassblockPhoenix = serDe.deserialize(json);
+	System.out.println(json);
+	Assert.assertEquals(grassblock, grassblockPhoenix);
     }
 }

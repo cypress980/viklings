@@ -1,18 +1,18 @@
-package graphics.debug;
+package graphics.flat;
 
 import java.util.List;
 
 import org.joml.Matrix4f;
 import org.joml.Vector3f;
 
-import graphics.Position;
+import engine.game.state.Position;
 import graphics.Renderer;
 import graphics.ResourceLoader;
 import graphics.core.Model;
 import graphics.core.ShaderProgram;
-import graphics.debug.DebugRenderable;
+import graphics.flat.FlatRenderable;
 
-public class DebugRenderer implements Renderer {
+public class FlatRenderer implements Renderer {
     
     private ShaderProgram hudShaderProgram;
 
@@ -20,7 +20,7 @@ public class DebugRenderer implements Renderer {
     
     private int windowWidthPx;
     
-    private List<? extends DebugRenderable> debug;
+    private List<? extends FlatRenderable> scene;
 
     private Matrix4f orthoMatrix;
     
@@ -45,7 +45,7 @@ public class DebugRenderer implements Renderer {
         
         //TODO: we only need to make this call when the window size changes
         Matrix4f ortho = getOrthoProjectionMatrix(0, windowWidthPx, windowHeightPx, 0);
-        for (DebugRenderable item : debug) {
+        for (FlatRenderable item : scene) {
             Model mesh = item.getModel();
             // Set orthographic and model matrix for this HUD item
             Matrix4f projModelMatrix = getOrthoProjModelMatrix(item.getPosition(), ortho);
@@ -74,8 +74,8 @@ public class DebugRenderer implements Renderer {
         this.windowWidthPx = windowWidthPx;
     }
     
-    public void setHud(List<? extends DebugRenderable> debug) {
-	this.debug = debug;
+    public void setScene(List<? extends FlatRenderable> scene) {
+	this.scene = scene;
     }
     
     private Matrix4f getOrthoProjectionMatrix(float left, float right, float bottom, float top) {
@@ -87,7 +87,7 @@ public class DebugRenderer implements Renderer {
     private Matrix4f getOrthoProjModelMatrix(Position gameItem, Matrix4f orthoMatrix) {
         Vector3f rotation = gameItem.getRotation();
         Matrix4f modelMatrix = new Matrix4f();
-        modelMatrix.identity().translate(gameItem.getPosition()).
+        modelMatrix.identity().translate(gameItem.getCoordinates()).
                 rotateX((float)Math.toRadians(-rotation.x)).
                 rotateY((float)Math.toRadians(-rotation.y)).
                 rotateZ((float)Math.toRadians(-rotation.z)).
