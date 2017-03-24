@@ -55,7 +55,7 @@ public class GameWindow {
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 2);
 	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 	glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
-
+	
 	// Create the window
 	windowHandle = glfwCreateWindow(width, height, title, NULL, NULL);
 	if (windowHandle == NULL) {
@@ -112,9 +112,11 @@ public class GameWindow {
 	glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
 
 	glEnable(GL_DEPTH_TEST);
+	
 	// Support for transparencies
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	
 	// For fun wireframes, uncomment this
 	//glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
     }

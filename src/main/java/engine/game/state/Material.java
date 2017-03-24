@@ -1,6 +1,7 @@
 package engine.game.state;
 
 import org.joml.Vector3f;
+import org.joml.Vector4f;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
@@ -19,9 +20,11 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
  */
 public class Material {
 
-    private static final Vector3f DEFAULT_COLOUR = new Vector3f(1.0f, 1.0f, 1.0f);
+    private static final float ALPHA_DEFAULT = 0;
+    
+    private static final Vector4f DEFAULT_COLOUR = new Vector4f(1.0f, 1.0f, 1.0f, ALPHA_DEFAULT);
 
-    private Vector3f color;
+    private Vector4f color;
     
     private float reflectance;
 
@@ -32,12 +35,18 @@ public class Material {
         reflectance = 0;
     }
     
-    public Material(Vector3f color, float reflectance) {
+    public Material(Vector4f color, float reflectance) {
         this();
         this.color = color;
         this.reflectance = reflectance;
     }
 
+    public Material(Vector3f color, float reflectance) {
+        this();
+        this.setColor(color);
+        this.reflectance = reflectance;
+    }
+    
     public Material(String textureFile, float reflectance) {
         this();
         this.textureFile = textureFile;
@@ -50,13 +59,17 @@ public class Material {
     }
 
     public Vector3f getColor() {
-        return color;
+        return new Vector3f(color.x, color.y, color.z);
+    }
+    
+    public void setColor(Vector3f color) {
+        this.color = new Vector4f(color.x, color.y, color.z, ALPHA_DEFAULT);
     }
 
-    public void setColor(Vector3f color) {
+    public void setColor(Vector4f color) {
         this.color = color;
     }
-
+    
     public float getReflectance() {
         return reflectance;
     }

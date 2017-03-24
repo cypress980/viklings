@@ -6,6 +6,11 @@ public interface GameLogic {
 
 	void input(GameWindow window, MouseInput mouseInput);
 
+	/**
+	 * 
+	 * @param interval time elapsed since last update in seconds
+	 * @param mouseInput
+	 */
 	void update(float interval, MouseInput mouseInput);
 
 	void render(GameWindow window);

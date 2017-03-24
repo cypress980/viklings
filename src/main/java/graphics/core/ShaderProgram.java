@@ -144,7 +144,7 @@ public class ShaderProgram {
     public void setUniform(String uniformName, Vector3f value) {
         glUniform3f(uniforms.get(uniformName), value.x, value.y, value.z);
     }
-
+    
     public void createMaterialUniform(String uniformName) throws Exception {
         createUniform(uniformName + ".color");
         createUniform(uniformName + ".useColor");

@@ -24,6 +24,8 @@ public class FlatRenderer implements Renderer {
 
     private Matrix4f orthoMatrix;
     
+    private Matrix4f modelViewMatrix = new Matrix4f();
+    
     @Override
     public void loadShaders() throws Exception {
 	orthoMatrix = new Matrix4f();
@@ -36,6 +38,7 @@ public class FlatRenderer implements Renderer {
         
         // Create uniforms for orthographic-model projection matrix and base color
         hudShaderProgram.createUniform("projModelMatrix");
+        hudShaderProgram.createUniform("modelViewMatrix");
         hudShaderProgram.createUniform("color");
     }
 
@@ -49,6 +52,7 @@ public class FlatRenderer implements Renderer {
             Model mesh = item.getModel();
             // Set orthographic and model matrix for this HUD item
             Matrix4f projModelMatrix = getOrthoProjModelMatrix(item.getPosition(), ortho);
+            hudShaderProgram.setUniform("modelViewMatrix", modelViewMatrix);
             hudShaderProgram.setUniform("projModelMatrix", projModelMatrix);
             hudShaderProgram.setUniform("color", item.getModel().getMaterial().getColor());
 
@@ -76,6 +80,10 @@ public class FlatRenderer implements Renderer {
     
     public void setScene(List<? extends FlatRenderable> scene) {
 	this.scene = scene;
+    }
+    
+    public void moveCamera(Vector3f pos) {
+	modelViewMatrix.translate(pos.negate());
     }
     
     private Matrix4f getOrthoProjectionMatrix(float left, float right, float bottom, float top) {

@@ -13,13 +13,21 @@ import graphics.flat.FlatRenderable;
  */
 public class Sprite implements FlatRenderable {
 
-    private final SpriteSheet sprite;
+    private final SpriteSheet spriteSheet;
     private final Position position;
     private int frame = 0;
+    private final float z;
     
     public Sprite(SpriteSheet spriteSheet) throws Exception {
-        this.sprite = spriteSheet;
+        this.spriteSheet = spriteSheet;
         this.position = new Position();
+        z = 0;
+    }
+    
+    public Sprite(SpriteSheet spriteSheet, float z) throws Exception {
+        this.spriteSheet = spriteSheet;
+        this.position = new Position();
+        this.z = z;
     }
     
     @Override
@@ -29,7 +37,7 @@ public class Sprite implements FlatRenderable {
     
     public void setFrame(int frame) throws Exception {
 	this.frame  = frame;
-	sprite.setFrame(frame);
+	spriteSheet.setFrame(frame);
     }
     
     public int getFrame() {
@@ -41,11 +49,11 @@ public class Sprite implements FlatRenderable {
     }
     
     public void setPosition(float x, float y) {
-        this.position.setCoordinates(x, y, 0);
+        this.position.setCoordinates(x, y, z);
     }
     
     @Override
     public Model getModel() {
-	return sprite.getModel();
+	return spriteSheet.getModel();
     }
 }

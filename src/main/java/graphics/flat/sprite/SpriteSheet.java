@@ -11,8 +11,6 @@ public class SpriteSheet {
 
     private static final float ZPOS = 0.0f;
 
-    private static final int VERTICES_PER_QUAD = 4;
-
     private final int numCols;
 
     private final int numRows;
@@ -34,7 +32,7 @@ public class SpriteSheet {
 	List<Float> textCoords = new ArrayList<>();
 	float[] normals   = new float[0];
 	List<Integer> indices   = new ArrayList<>();
-
+	
 	//Create texture in openGL land, just to get the h & w
 	Texture texture = new Texture(material.getTextureFile());
 
