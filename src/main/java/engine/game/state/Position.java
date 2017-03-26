@@ -1,5 +1,6 @@
 package engine.game.state;
 
+import org.joml.Vector2f;
 import org.joml.Vector3f;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
@@ -89,5 +90,9 @@ public class Position {
 	if (Float.floatToIntBits(scale) != Float.floatToIntBits(other.scale))
 	    return false;
 	return true;
+    }
+
+    public void change(Vector3f displacement) {
+	this.coordinates.add(displacement);
     }
 }

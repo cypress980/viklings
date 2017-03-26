@@ -4,6 +4,8 @@ import engine.GameWindow;
 import engine.game.state.Position;
 import graphics.core.Model;
 import graphics.flat.FlatRenderable;
+import org.joml.Vector2f;
+import org.joml.Vector3f;
 
 /**
  * A 2D image that can be rendered in our scene
@@ -35,7 +37,7 @@ public class Sprite implements FlatRenderable {
         return position;
     }
     
-    public void setFrame(int frame) throws Exception {
+    public void setFrame(int frame) {
 	this.frame  = frame;
 	spriteSheet.setFrame(frame);
     }
@@ -50,6 +52,14 @@ public class Sprite implements FlatRenderable {
     
     public void setPosition(float x, float y) {
         this.position.setCoordinates(x, y, z);
+    }
+    
+    public void move(Vector3f displacement) {
+	position.change(displacement);
+    }
+    
+    public void update() throws Exception {
+	spriteSheet.update();
     }
     
     @Override

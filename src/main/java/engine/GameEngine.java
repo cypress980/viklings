@@ -51,6 +51,7 @@ public class GameEngine implements Runnable {
 	mouseInput.init(window);
     }
 
+    //TODO: we need separate time scales for updating User Input, Physics, and Graphics
     protected void gameLoop() {
 	float elapsedTime;
 	float accumulator = 0f;

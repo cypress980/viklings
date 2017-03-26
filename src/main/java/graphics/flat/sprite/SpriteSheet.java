@@ -104,8 +104,11 @@ public class SpriteSheet {
 	return frame;
     }
 
-    public void setFrame(int frame) throws Exception {
+    public void setFrame(int frame) {
 	this.frame = frame;
+    }
+    
+    public void update() throws Exception {
 	Material material = model.getMaterial();
 	model.deleteBuffers();
 	model = buildMesh(material, numCols, numRows);
