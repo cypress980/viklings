@@ -6,11 +6,11 @@ layout (location=2) in vec3 vertexNormal;
 
 out vec2 outTexCoord;
 
-uniform mat4 projModelMatrix;
 uniform mat4 modelViewMatrix;
+uniform mat4 projectionMatrix;
 
 void main()
 {
-    gl_Position = modelViewMatrix * projModelMatrix * vec4(position, 1.0);
+    gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
     outTexCoord = texCoord;
 }
