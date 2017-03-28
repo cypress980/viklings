@@ -36,9 +36,9 @@ public class PhysicsEngine {
 	    CollisionEvent collision = pair.a.getCollision(pair.b);
 	    if (!collision.equals(CollisionEvent.NONE)) {
 		System.out.println("Collision: body with mass [" + collision.getMessageA().getBody().getMass() + 
-			"] changed velocity by [" + collision.getMessageA().getVelocity() + 
+			"] changed velocity by [" + collision.getMessageA().getDv() + 
 			"], and body with mass [" + collision.getMessageB().getBody().getMass() +  
-			"] changed velocity by [" + collision.getMessageB().getVelocity());
+			"] changed velocity by [" + collision.getMessageB().getDv());
 		//Notify of each interaction
 		//This could probably be made more efficient by multithreading, but for now, we'll just 
 		//pump out messages as we test on a single thread;
@@ -49,8 +49,6 @@ public class PhysicsEngine {
 		l2.physicsUpdate(collision.getMessageB());
 	    }
 	}
-	
-	listeners.keySet().forEach(body -> body.applyFriction(interval));
     }
     
     public void setPossibleInteractions(List<Pair<RigidBody>> possibleInteractions) {

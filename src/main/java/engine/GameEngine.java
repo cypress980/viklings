@@ -62,9 +62,8 @@ public class GameEngine implements Runnable {
 	    elapsedTime = timer.getElapsedTime();
 	    accumulator += elapsedTime;
 
-	    input();
-
 	    while (accumulator >= interval) {
+		input(interval);
 		update(interval);
 		accumulator -= interval;
 	    }
@@ -88,13 +87,13 @@ public class GameEngine implements Runnable {
 	}
     }
 
-    protected void input() {
+    protected void input(float interval) {
 	mouseInput.input(window);
-	gameLogic.input(window, mouseInput);
+	gameLogic.input(window, mouseInput, interval);
     }
 
     protected void update(float interval) {
-	gameLogic.update(interval, mouseInput);
+	gameLogic.update(interval);
     }
 
     protected void render() {

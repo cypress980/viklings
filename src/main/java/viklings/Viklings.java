@@ -170,7 +170,7 @@ public class Viklings implements GameLogic{
     private boolean bunny = false;
     
     @Override
-    public void input(GameWindow window, MouseInput mouseInput) {
+    public void input(GameWindow window, MouseInput mouseInput, float interval) {
         cameraInc.set(0, 0, 0);
         if (window.isKeyPressed(GLFW_KEY_W)) {
             cameraInc.z = -1;
@@ -205,18 +205,18 @@ public class Viklings implements GameLogic{
         } else if (window.isKeyPressed(GLFW_KEY_M)) {
             this.spotLights.get(0).getPointLight().getPosition().z = lightPos - 0.1f;
         }
-    }
-
-    @Override
-    public void update(float interval, MouseInput mouseInput) {
-        // Update camera position
-        camera.movePosition(cameraInc.x * CAMERA_POS_STEP, cameraInc.y * CAMERA_POS_STEP, cameraInc.z * CAMERA_POS_STEP);
-
+        
         // Update camera based on mouse            
         if (mouseInput.isRightButtonPressed()) {
             Vector2f rotVec = mouseInput.getDisplVec();
             camera.moveRotation(rotVec.x * MOUSE_SENSITIVITY, rotVec.y * MOUSE_SENSITIVITY, 0);
         }
+    }
+
+    @Override
+    public void update(float interval) {
+        // Update camera position
+        camera.movePosition(cameraInc.x * CAMERA_POS_STEP, cameraInc.y * CAMERA_POS_STEP, cameraInc.z * CAMERA_POS_STEP);
         
         // Update directional light direction, intensity and colour
         lightAngle += 1.1f;

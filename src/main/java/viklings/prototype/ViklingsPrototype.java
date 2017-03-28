@@ -3,7 +3,9 @@ package viklings.prototype;
 import static org.lwjgl.glfw.GLFW.*;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.joml.Vector3f;
 
@@ -59,13 +61,14 @@ public class ViklingsPrototype implements GameLogic {
     ViklingCharacter punchy;
 
     private final ArrayList<Pair<RigidBody>> physicsInteractions = new ArrayList<>();
-    
+    private Text debugText;
     
     @Override
     public void init(GameWindow window) throws Exception {
 	// Set up scene renderer
 	gameRenderer = new FlatRenderer();
-	scene.add(new Text("Hi Cuddlebug"));
+	debugText = new Text("Hi Cuddlebug");
+	scene.add(debugText);
 	
 	// Bjorn
 	SpriteSheet bjornSpriteSheet = new SpriteSheet("textures/sprites/vikling.png", 9, 1);
@@ -87,7 +90,7 @@ public class ViklingsPrototype implements GameLogic {
 	
 	Vector3f punchyphysxPosition = new Vector3f(112, 100, 0);
 	HitBox punchyHitBox = new HitBox(punchyphysxPosition, 32, 12);
-	RigidBody punchyPhsxBody = new RigidBody(punchyHitBox, 5, punchyphysxPosition, new Vector3f());
+	RigidBody punchyPhsxBody = new RigidBody(punchyHitBox, 40, punchyphysxPosition, new Vector3f());
 	
 	punchy = new ViklingCharacter(punchySprite, punchyPhsxBody);
 	
@@ -106,8 +109,31 @@ public class ViklingsPrototype implements GameLogic {
 	graphicsEngine.addRenderer(gameRenderer);
     }
     
+    private boolean isPaused = false;
+    
+    
     @Override
-    public void input(GameWindow window, MouseInput mouseInput) {
+    public void input(GameWindow window, MouseInput mouseInput, float interval) {
+	inputPauseControls(window, mouseInput, interval);
+	inputCameraControls(window, mouseInput);
+	
+	if (!isPaused) {
+	    inputCharacterControls(window, mouseInput);
+	}
+    }
+    
+    private boolean isSpacePressed = false;
+    
+    private void inputPauseControls(GameWindow window, MouseInput mouseInput, float interval) {
+	//Since this is a toggled key, we need to have a cooldown on it, so we dont rapidly toggle on and off
+	if (isSpacePressed && !window.isKeyPressed(GLFW_KEY_SPACE)) {
+	    isPaused = !isPaused;
+	}
+	
+	isSpacePressed = window.isKeyPressed(GLFW_KEY_SPACE);
+    }
+    
+    private void inputCharacterControls(GameWindow window, MouseInput mouseInput) {
 	if (window.isKeyPressed(GLFW_KEY_W)) {
 	    bjorn.move(Move.UP);
 	}
@@ -130,7 +156,9 @@ public class ViklingsPrototype implements GameLogic {
 		!window.isKeyPressed(GLFW_KEY_A)) {
 	    bjorn.move(Move.STAND);
 	}
-
+    }
+    
+    private void inputCameraControls(GameWindow window, MouseInput mouseInput) {
 	float dxCam = 0, dyCam = 0;
 	
 	if (window.isKeyPressed(GLFW_KEY_UP)) {
@@ -149,8 +177,17 @@ public class ViklingsPrototype implements GameLogic {
     }
 
     @Override
-    public void update(float interval, MouseInput mouseInput) {
+    public void update(float interval) {
 	try {
+	    if (isPaused) { 
+		if (!debugText.getText().equals("Paused!")) {
+		    debugText.setText("Paused!");
+		}
+		return;
+	    } else if (!isPaused && !debugText.getText().equals("Hi Cuddlebug!")) {
+		debugText.setText("Hi Cuddlebug!");
+	    }
+	    
 	    physicsEngine.simulatePhysics(interval);
 	    bjorn.update(interval);
 	    punchy.update(interval);
