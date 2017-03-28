@@ -1,21 +1,62 @@
 package engine.physics;
 
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+
 import org.joml.Vector3f;
 
-public class RigidBody {
+public class RigidBody implements PhysicsEngine.Listener {
+
+    private static final float FRICTION_COEF = 800f; // slow down by this many px per frame due to friction 
+	     // after collision (includes constant normal force)
 
     private final HitBox hitBox;
 
     private float mass;
 
     private Vector3f velocity;
-
+    
+    private final List<Vector3f> collisions;
+    
     public RigidBody(HitBox hitBox, float mass, Vector3f position, Vector3f velocity) {
 	this.hitBox = hitBox;
 	this.mass = mass;
 	this.velocity = velocity;
+	this.collisions = new ArrayList<>();
     }
+    
+    @Override
+    public void physicsUpdate(ElasticCollisionMessage message) {
+	collisions.add(message.getDv());
+	hitBox.move(message.getDs());
+	velocity.add(message.getDv());
+    }
+    
+    public void updatePhysics(float interval) {
+	
+	// process collision
+ 	Vector3f collisionsDv = new Vector3f();
+ 	// Process Collision
+ 	// each collision event tells us the change in velocity immediately following the collision
+ 	// We then apply the friction coefficient to decelerate for the interval
+ 	// So what we went to do is tell the body the initial velocity change at the time of the collision event
+ 	// and then update it with a decayed velocity based on the friction
+ 	for (Iterator<Vector3f> iterator = collisions.iterator(); iterator.hasNext(); ) {
+ 	    Vector3f bounce = iterator.next();
+ 	    collisionsDv.add(new Vector3f(bounce).mul(interval));
 
+ 	    float dv = FRICTION_COEF * interval;
+ 	    if (dv >= bounce.length()) {
+ 		iterator.remove();
+ 	    } else {
+ 		bounce.sub(new Vector3f(bounce).normalize().mul(dv));
+ 	    }
+ 	}
+ 	
+	velocity.add(collisionsDv);
+    }
+    
     public CollisionEvent getCollision(RigidBody b) {
 
 	if (this.hitBox.isCollision(b.getHitBox())) {
@@ -100,15 +141,18 @@ public class RigidBody {
     }
 
     public Vector3f getVelocity() {
-	return velocity;
+	return new Vector3f(velocity);
     }
-
+    
     public void setVelocity(Vector3f velocity) {
-	this.velocity = velocity;
+	this.velocity = new Vector3f(velocity);
     }
-
+    
     public HitBox getHitBox() {
 	return hitBox;
     }
 
+    public boolean isInCollision() {
+	return !collisions.isEmpty();
+    }
 }

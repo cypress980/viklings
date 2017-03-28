@@ -94,8 +94,8 @@ public class ViklingsPrototype implements GameLogic {
 	
 	punchy = new ViklingCharacter(punchySprite, punchyPhsxBody);
 	
-	physicsEngine.registerListener(bjorn, bjornPhsxBody);
-	physicsEngine.registerListener(punchy, punchyPhsxBody);
+	physicsEngine.registerListener(bjornPhsxBody, bjornPhsxBody);
+	physicsEngine.registerListener(punchyPhsxBody, punchyPhsxBody);
 	
 	physicsInteractions.add(new Pair<>(bjornPhsxBody, punchyPhsxBody));
 	physicsEngine.setPossibleInteractions(physicsInteractions);

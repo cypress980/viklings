@@ -4,10 +4,9 @@ import org.joml.Vector3f;
 
 public class HitBox {
     
-    private float delta = 0.0f;
-    
     private float minX, maxX, minY, maxY;
     
+    private final Vector3f position;
     /**
      * 
      * @param position position of top left corner of hit box
@@ -15,6 +14,8 @@ public class HitBox {
      * @param width width of hit box
      */
     public HitBox(Vector3f position, float height, float width) {
+	this.position = position;
+	
 	minX = position.x;
 	minY = position.y;
 	
@@ -39,10 +40,16 @@ public class HitBox {
     }
     
     public void move(Vector3f displacement) {
+	position.add(displacement);
+	
 	minX += displacement.x;
 	minY += displacement.y;
 	maxX += displacement.x;
 	maxY += displacement.y;
+    }
+    
+    public Vector3f getPosition() {
+	return new Vector3f(position); //Defensive Copy
     }
 
     public boolean isCollision(HitBox that) {
