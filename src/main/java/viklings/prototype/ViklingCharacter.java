@@ -102,8 +102,9 @@ public class ViklingCharacter {
     }
     
     private Vector3f calculateDeltaVForMovesForInterval(float interval) {
-	// TODO: Figure out how to move physics to physics engine, and have controls in controls engine so that this
-	// object becomes only responsible for orchestration
+	// TODO: This control maybe doesn't belong in the physics engine proper, but it might be nice to
+	// move it to it's own class that takes keyboard and mouse input and translates it to instructions for the
+	// physics engine.
 	
 	// Get current Velocity of body
 	Vector3f bodyVelocity = body.getVelocity();

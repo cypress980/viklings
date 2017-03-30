@@ -3,10 +3,9 @@ package viklings.prototype;
 import static org.lwjgl.glfw.GLFW.*;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.joml.Vector3f;
 
 import engine.GameEngine;
@@ -31,7 +30,8 @@ import viklings.prototype.ViklingCharacter.Move;
  *
  */
 public class ViklingsPrototype implements GameLogic {
-
+    static final Logger logger = LogManager.getLogger(ViklingsPrototype.class.getName());
+    
     public static void main(String[] args) {
 	try {
 	    boolean vSync = true;

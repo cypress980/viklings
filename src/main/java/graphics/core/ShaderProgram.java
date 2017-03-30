@@ -7,6 +7,8 @@ import java.nio.FloatBuffer;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.joml.Matrix4f;
 import org.joml.Vector3f;
 import org.lwjgl.system.MemoryStack;
@@ -30,6 +32,8 @@ import graphics.core.scene.SpotLight;
  *
  */
 public class ShaderProgram {
+    static final Logger logger = LogManager.getLogger(ShaderProgram.class.getName());
+    
     private final int programId;
 
     private int vertexShaderId;
@@ -85,9 +89,12 @@ public class ShaderProgram {
             glDetachShader(programId, fragmentShaderId);
         }
 
-        glValidateProgram(programId);
-        if (glGetProgrami(programId, GL_VALIDATE_STATUS) != GL_TRUE) {
-            System.err.println("Warning validating Shader code: " + glGetProgramInfoLog(programId, 1024));
+        if (logger.isDebugEnabled()) {
+            glValidateProgram(programId);
+            if (glGetProgrami(programId, GL_VALIDATE_STATUS) != GL_TRUE) {
+        	String programInfoLog = glGetProgramInfoLog(programId, 1024);
+        	logger.debug("Warning validating Shader code with program Id [{}]: [{}]", programId, programInfoLog);
+            }
         }
     }
     

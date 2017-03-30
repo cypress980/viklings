@@ -15,6 +15,7 @@
 		<joml.version>1.9.2</joml.version>
 		<pngdecoder.version>1.0</pngdecoder.version>
 		<jackson-core-version>2.8.1</jackson-core-version>
+		<log4j.version>2.8.1</log4j.version>
 		<junit.version>4.12</junit.version>
 	</properties>
 	<profiles>
@@ -93,6 +94,16 @@
             <artifactId>joml</artifactId>
             <version>${joml.version}</version>
         </dependency>
+	<dependency>
+		<groupId>org.apache.logging.log4j</groupId>
+		<artifactId>log4j-api</artifactId>
+		<version>${log4j.version}</version>
+	</dependency>
+	<dependency>
+		<groupId>org.apache.logging.log4j</groupId>
+		<artifactId>log4j-core</artifactId>
+		<version>${log4j.version}</version>
+	</dependency>
 		<dependency>
 			<groupId>org.l33tlabs.twl</groupId>
 			<artifactId>pngdecoder</artifactId>
