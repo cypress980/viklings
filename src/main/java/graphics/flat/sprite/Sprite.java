@@ -54,10 +54,6 @@ public class Sprite implements FlatRenderable {
         this.position.setCoordinates(x, y, z);
     }
     
-    public void move(Vector3f displacement) {
-	position.change(displacement);
-    }
-    
     public void update() throws Exception {
 	spriteSheet.update();
     }

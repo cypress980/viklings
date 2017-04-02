@@ -1,5 +1,7 @@
 package engine;
 
+import java.util.List;
+
 public interface GameLogic {
 
 	void init(GameWindow window) throws Exception;
@@ -15,4 +17,6 @@ public interface GameLogic {
 	void render(GameWindow window);
 	
 	void cleanup();
+	
+	List<EngineComponent> getEngineComponents();
 }

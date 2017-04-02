@@ -24,6 +24,7 @@ public class ViklingCharacter {
     private static final float ACCELERATION = 400; // 0.5s to get to top speed
     private static final float DECELERATION = 4000; // 0.05 s to stop from top speed
     
+    private final Vector3f positionDelta;
     public static enum Move {
 	STAND,
 	RIGHT,
@@ -37,6 +38,7 @@ public class ViklingCharacter {
 	this.spriteAnimator = new SpriteAnimator(sprite);
 	this.moves = new ArrayList<>();
 	this.body = body;
+	positionDelta = new Vector3f(body.getHitBox().getPosition()).sub(sprite.getPosition().getCoordinates());
     }
     
     public void move(Move move) {
@@ -69,9 +71,6 @@ public class ViklingCharacter {
     }
 
     public void update(float interval) throws Exception {
-	//TODO: move responsibility for updating these to the physics engine
-	body.updatePhysics(interval);
-	
 	//Update animation
 	spriteAnimator.update(interval);
 	
@@ -98,7 +97,10 @@ public class ViklingCharacter {
 	// Calculate displacement from collision or player movement control
 	Vector3f ds = body.getVelocity().mul(interval); //Displacement is sum of previous velocity * time
 	body.getHitBox().move(ds);
-	sprite.move(ds);
+	//Don't move sprite independently. Instead, move it to where the hitbox is explicitly, respecting the initial
+	//difference in position.
+	Vector3f spritePos = body.getHitBox().getPosition().add(positionDelta);
+	sprite.setPosition(spritePos.x, spritePos.y);
     }
     
     private Vector3f calculateDeltaVForMovesForInterval(float interval) {

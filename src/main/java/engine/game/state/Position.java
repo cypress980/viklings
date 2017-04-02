@@ -21,13 +21,17 @@ public class Position {
     }
     
     public Vector3f getCoordinates() {
-	return coordinates;
+	return new Vector3f(coordinates);
     }
     
     public void setCoordinates(float x, float y, float z) {
 	this.coordinates.x = x;
 	this.coordinates.y = y;
 	this.coordinates.z = z;
+    }
+    
+    public void setCoordinates(Vector3f coordinates) {
+	this.coordinates.set(coordinates);
     }
     
     public float getScale() {

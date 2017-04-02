@@ -4,6 +4,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
+import engine.EngineComponent;
+
 /**
  * The physics engine tests for physical interactions between items in the world, 
  * and notifies listeners of those interactions
@@ -11,10 +16,13 @@ import java.util.Map;
  * @author cypress980
  *
  */
-public class PhysicsEngine {
+public class PhysicsEngine implements EngineComponent {
+    private static final Logger logger = LogManager.getLogger(PhysicsEngine.class.getName());
     private static final Listener DEFAULT_LISTENER = new DummyListener();
+    
     private final Map<RigidBody, Listener> listeners;
     private List<Pair<RigidBody>> possibleInteractions;
+    private float updateIntervalHint;
     
     public PhysicsEngine() {
 	listeners = new HashMap<>();
@@ -35,18 +43,15 @@ public class PhysicsEngine {
 	for (Pair<RigidBody> pair : possibleInteractions) {
 	    CollisionEvent collision = pair.a.getCollision(pair.b);
 	    if (!collision.equals(CollisionEvent.NONE)) {
-		System.out.println("Collision: body with mass [" + collision.getMessageA().getBody().getMass() + 
-			"] changed velocity by [" + collision.getMessageA().getDv() + 
-			"], and body with mass [" + collision.getMessageB().getBody().getMass() +  
-			"] changed velocity by [" + collision.getMessageB().getDv());
+
 		//Notify of each interaction
 		//This could probably be made more efficient by multithreading, but for now, we'll just 
 		//pump out messages as we test on a single thread;
 		Listener l1 = listeners.getOrDefault(collision.getMessageA().getBody(), DEFAULT_LISTENER);
 		Listener l2 = listeners.getOrDefault(collision.getMessageB().getBody(), DEFAULT_LISTENER);
 		
-		l1.physicsUpdate(collision.getMessageA());
-		l2.physicsUpdate(collision.getMessageB());
+		l1.notifyOfCollision(collision.getMessageA());
+		l2.notifyOfCollision(collision.getMessageB());
 	    }
 	}
     }
@@ -56,12 +61,12 @@ public class PhysicsEngine {
     }
     
     public static interface Listener {
-	void physicsUpdate(ElasticCollisionMessage message);
+	void notifyOfCollision(ElasticCollisionMessage message);
     }
     
     static class DummyListener implements Listener{
 	@Override
-	public void physicsUpdate(ElasticCollisionMessage message) {
+	public void notifyOfCollision(ElasticCollisionMessage message) {
 	    return; //Do Nothing
 	}
     }
@@ -74,5 +79,24 @@ public class PhysicsEngine {
 	    this.a = a;
 	    this.b = b;
 	}
+    }
+
+    @Override
+    public void update(float interval) throws Exception{
+	// Update bodies
+	for (RigidBody body : listeners.keySet()) {
+	    body.updatePhysics(interval);
+	}
+	// Test for physical interactions
+	this.simulatePhysics(interval);
+    }
+
+    @Override
+    public float getUpdateInterval() {
+	return updateIntervalHint;
+    }
+
+    public void setUpdateIntervalHint(float updateIntervalHint) {
+	this.updateIntervalHint = updateIntervalHint;
     }
 }

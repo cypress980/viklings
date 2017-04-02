@@ -8,6 +8,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.joml.Vector3f;
 
+import engine.EngineComponent;
 import engine.GameEngine;
 import engine.GameLogic;
 import engine.GameWindow;
@@ -30,7 +31,9 @@ import viklings.prototype.ViklingCharacter.Move;
  *
  */
 public class ViklingsPrototype implements GameLogic {
-    static final Logger logger = LogManager.getLogger(ViklingsPrototype.class.getName());
+    private static final Logger logger = LogManager.getLogger(ViklingsPrototype.class.getName());
+    
+    private static final float PHYSICS_UPDATE_INTERVAL_SECONDS = 1f/59f;
     
     public static void main(String[] args) {
 	try {
@@ -51,10 +54,15 @@ public class ViklingsPrototype implements GameLogic {
     private FlatRenderer gameRenderer;
     
     private List<FlatRenderable> scene = new ArrayList<>();
+
+    private final ArrayList<EngineComponent> gameEngineComponents;
     
     public ViklingsPrototype() {
 	graphicsEngine = new GraphicsEngine();
 	physicsEngine = new PhysicsEngine();
+	physicsEngine.setUpdateIntervalHint(PHYSICS_UPDATE_INTERVAL_SECONDS);
+	gameEngineComponents = new ArrayList<>();
+	gameEngineComponents.add(physicsEngine);
     }
     
     ViklingCharacter bjorn;
@@ -188,7 +196,8 @@ public class ViklingsPrototype implements GameLogic {
 		debugText.setText("Hi Cuddlebug!");
 	    }
 	    
-	    physicsEngine.simulatePhysics(interval);
+	    //TODO: Half way through physics refactor, gotta make it work
+	    //physicsEngine.simulatePhysics(interval);
 	    bjorn.update(interval);
 	    punchy.update(interval);
 	} catch (Exception e) {
@@ -205,5 +214,10 @@ public class ViklingsPrototype implements GameLogic {
     @Override
     public void cleanup() {
 	graphicsEngine.removeRenderer(gameRenderer);
+    }
+
+    @Override
+    public List<EngineComponent> getEngineComponents() {
+	return gameEngineComponents;
     }
 }

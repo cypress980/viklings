@@ -10,6 +10,7 @@ import java.util.Map;
 import org.joml.Vector2f;
 import org.joml.Vector3f;
 
+import engine.EngineComponent;
 import engine.GameEngine;
 import engine.GameLogic;
 import engine.GameWindow;
@@ -253,6 +254,12 @@ public class Viklings implements GameLogic{
         for (Model model : gameComponents.values()) {
             model.cleanUp();
         }
+    }
+
+    @Override
+    public List<EngineComponent> getEngineComponents() {
+	// TODO Auto-generated method stub
+	return null;
     }
 
 }

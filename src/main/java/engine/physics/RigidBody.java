@@ -4,10 +4,13 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.joml.Vector3f;
 
 public class RigidBody implements PhysicsEngine.Listener {
-
+    private static final Logger logger = LogManager.getLogger(RigidBody.class.getName());
+    
     private static final float FRICTION_COEF = 800f; // slow down by this many px per frame due to friction 
 	     // after collision (includes constant normal force)
 
@@ -19,6 +22,11 @@ public class RigidBody implements PhysicsEngine.Listener {
     
     private final List<Vector3f> collisions;
     
+    /**
+     * This is added to the displacement when a collision occurs to ensure collisions don't chain on eachother
+     */
+    private static final float OFFSET_DELTA = 0.0001f;
+    
     public RigidBody(HitBox hitBox, float mass, Vector3f position, Vector3f velocity) {
 	this.hitBox = hitBox;
 	this.mass = mass;
@@ -27,7 +35,8 @@ public class RigidBody implements PhysicsEngine.Listener {
     }
     
     @Override
-    public void physicsUpdate(ElasticCollisionMessage message) {
+    public void notifyOfCollision(ElasticCollisionMessage message) {
+	logger.debug("Collision! [{}]", message);
 	collisions.add(message.getDv());
 	hitBox.move(message.getDs());
 	velocity.add(message.getDv());
@@ -117,16 +126,10 @@ public class RigidBody implements PhysicsEngine.Listener {
 		    ds.y = this.hitBox.getMinY() - b.hitBox.getMaxY();
 		}
 	    }
-
-	    //ds is relative to object 2 being still, but from the camera frame, that may not be the case
-	    // so split the displacement by the same proportion as the velocity change, which is
-	    // Proportionate to the mass
-	    Vector3f ds1 = new Vector3f();
-	    Vector3f ds2 = new Vector3f(ds);
-
+	    
 	    return new CollisionEvent(
-		    new ElasticCollisionMessage(this, dv1, ds1), 
-		    new ElasticCollisionMessage(b, dv2, ds1));
+		    new ElasticCollisionMessage(this, dv1, new Vector3f()), 
+		    new ElasticCollisionMessage(b, dv2, ds));
 	}
 
 	return CollisionEvent.NONE;
@@ -154,5 +157,11 @@ public class RigidBody implements PhysicsEngine.Listener {
 
     public boolean isInCollision() {
 	return !collisions.isEmpty();
+    }
+
+    @Override
+    public String toString() {
+	return "RigidBody [hitBox=" + hitBox + ", mass=" + mass + ", velocity=" + velocity + ", collisions="
+		+ collisions + "]";
     }
 }

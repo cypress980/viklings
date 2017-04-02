@@ -24,4 +24,9 @@ public class ElasticCollisionMessage {
     public Vector3f getDs() {
         return ds;
     }
+
+    @Override
+    public String toString() {
+	return "ElasticCollisionMessage [body=" + body + ", dv=" + dv + ", ds=" + ds + "]";
+    }
 }

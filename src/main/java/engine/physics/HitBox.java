@@ -54,10 +54,18 @@ public class HitBox {
 
     public boolean isCollision(HitBox that) {
 	
-	return this.maxX >= that.minX &&
-		this.minX <= that.maxX &&
-		this.maxY >= that.minY &&
-		this.minY <= that.maxY;              
+	return this.maxX > that.minX &&
+		this.minX < that.maxX &&
+		this.maxY > that.minY &&
+		this.minY < that.maxY;              
 
     }
+
+    @Override
+    public String toString() {
+	return "HitBox [minX=" + minX + ", maxX=" + maxX + ", minY=" + minY + ", maxY=" + maxY + ", position="
+		+ position + "]";
+    }
+    
+    
 }

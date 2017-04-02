@@ -4,6 +4,7 @@ import org.joml.Vector3f;
 import org.joml.Vector4f;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 /**
  * This class contains all attributes related to the rendering of an object's material.
@@ -20,7 +21,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
  */
 public class Material {
 
-    private static final float ALPHA_DEFAULT = 0;
+    private static final float ALPHA_DEFAULT = 1;
     
     private static final Vector4f DEFAULT_COLOUR = new Vector4f(1.0f, 1.0f, 1.0f, ALPHA_DEFAULT);
 
@@ -58,14 +59,15 @@ public class Material {
         this.textureFile = textureFile;
     }
 
-    public Vector3f getColor() {
-        return new Vector3f(color.x, color.y, color.z);
+    public Vector4f getColor() {
+        return new Vector4f(color);
     }
     
     public void setColor(Vector3f color) {
         this.color = new Vector4f(color.x, color.y, color.z, ALPHA_DEFAULT);
     }
 
+    @JsonProperty
     public void setColor(Vector4f color) {
         this.color = color;
     }
