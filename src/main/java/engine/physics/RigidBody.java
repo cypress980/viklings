@@ -1,7 +1,6 @@
 package engine.physics;
 
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 
 import org.apache.logging.log4j.LogManager;
@@ -11,7 +10,7 @@ import org.joml.Vector3f;
 public class RigidBody implements PhysicsEngine.Listener {
     private static final Logger logger = LogManager.getLogger(RigidBody.class.getName());
     
-    private static final float FRICTION_COEF = 800f; // slow down by this many px per frame due to friction 
+    private static final float FRICTION_COEF = 1200f; // slow down by this many px per frame due to friction 
 	     // after collision (includes constant normal force)
 
     private final HitBox hitBox;
@@ -20,55 +19,65 @@ public class RigidBody implements PhysicsEngine.Listener {
 
     private Vector3f velocity;
     
-    private final List<Vector3f> collisions;
+    private final List<ElasticCollisionMessage> collisionEvents;
     
-    /**
-     * This is added to the displacement when a collision occurs to ensure collisions don't chain on eachother
-     */
-    private static final float OFFSET_DELTA = 0.0001f;
+    private boolean isSliding = false;
+
+    private final Vector3f position;
     
     public RigidBody(HitBox hitBox, float mass, Vector3f position, Vector3f velocity) {
 	this.hitBox = hitBox;
 	this.mass = mass;
 	this.velocity = velocity;
-	this.collisions = new ArrayList<>();
+	this.collisionEvents = new ArrayList<>();
+	this.position = new Vector3f(position);
     }
     
     @Override
     public void notifyOfCollision(ElasticCollisionMessage message) {
 	logger.debug("Collision! [{}]", message);
-	collisions.add(message.getDv());
-	hitBox.move(message.getDs());
-	velocity.add(message.getDv());
+	collisionEvents.add(message); //store the collision to process in the update
     }
     
     public void updatePhysics(float interval) {
+	//Try this: Each collision is a single thing that happened since the last update.
+	//Process all the displacements, then all the velocities, then add them to the current velocity.
+	// After that, slow the velocity for friction.
+	// Then calculate the final displacement from the collision displacements + velocity * interval, and move by that.
+	for (ElasticCollisionMessage event : collisionEvents) {
+	    //offset position
+	    this.move(event.getDs());
+	    this.velocity.add(event.getDv());
+	}
 	
-	// process collision
- 	Vector3f collisionsDv = new Vector3f();
- 	// Process Collision
- 	// each collision event tells us the change in velocity immediately following the collision
- 	// We then apply the friction coefficient to decelerate for the interval
- 	// So what we went to do is tell the body the initial velocity change at the time of the collision event
- 	// and then update it with a decayed velocity based on the friction
- 	for (Iterator<Vector3f> iterator = collisions.iterator(); iterator.hasNext(); ) {
- 	    Vector3f bounce = iterator.next();
- 	    collisionsDv.add(new Vector3f(bounce).mul(interval));
-
- 	    float dv = FRICTION_COEF * interval;
- 	    if (dv >= bounce.length()) {
- 		iterator.remove();
- 	    } else {
- 		bounce.sub(new Vector3f(bounce).normalize().mul(dv));
- 	    }
- 	}
- 	
-	velocity.add(collisionsDv);
+	if (!collisionEvents.isEmpty()) {
+	    isSliding = true;
+	    //Clear collision events after processing
+	    collisionEvents.clear();
+	}
+	
+	//If we're in a collision, apply friction coefficient
+	if (isSliding) {
+	    float dvLen = FRICTION_COEF * interval;
+	    if (dvLen > velocity.length()) {
+		//If friction is greater than velocity, stop.
+		velocity.set(0, 0, 0);
+		//If we were in a collision, we're not anymore
+		isSliding = false;
+	    } else {
+		Vector3f dv = new Vector3f(velocity).normalize().mul(dvLen);
+		velocity.sub(dv);
+	    }
+	}
+	
+	//Finally, displace by velocity * interval
+	Vector3f ds = new Vector3f(velocity).mul(interval);
+	this.hitBox.move(ds);
     }
     
     public CollisionEvent getCollision(RigidBody b) {
 
-	if (this.hitBox.isCollision(b.getHitBox())) {
+	if (this.hitBox.isCollision(b.hitBox)) {
 	    //to determine the new velocity of each point mass, we assume an elastic collision of point masses
 	    // This tells us two things. 1) Momentum (p=m*v) is conserved:
 	    // m1*v1 + m2*v2 = m1*v1' + m2*v2'
@@ -85,51 +94,64 @@ public class RigidBody implements PhysicsEngine.Listener {
 	    // This assumption lets us use a simple derivation:
 	    // w1' = v * ( ( m1 - m2 ) / (m1 + m2) )
 	    // w2' = v * ( 2 m1 / (m1 + m2)) 
+	    
+	    Vector3f dv = new Vector3f(this.velocity).sub(b.velocity);
+	    float massSum = this.mass + b.getMass();
+
+	    Vector3f v1 = (new Vector3f(dv)).mul((this.mass - b.getMass()) / massSum);
+	    Vector3f v2 = (new Vector3f(dv)).mul((2 * this.mass) / massSum);
+	    
+	    // But we need to return to the game's frame of reference.
+	    // Remember, we determined v by taking v2 to be at rest, i.e. we did the calculation from v2's perspective
+	    // now let's add v2's velocity back in
 	    //
-	    // and
 	    // v1' = w1' + v2
 	    // v2' = w2' + v2
-
+	    // 
+	    // And lastly, we need to subtract the initial velocity of each to get the delta.
+	    // 
 	    // Therefore
 	    // dv1 = v1' - v1 = v * ( ( m1 - m2 ) / (m1 + m2) ) + v2 - v1
 	    // dv2 = v2' - v2 = v * ( 2 m1 / (m1 + m2)) + v2 - v2
-
-	    Vector3f v = new Vector3f(this.velocity).sub(b.velocity);
-	    float massSum = this.mass + b.getMass();
-
-	    Vector3f dv1 = (new Vector3f(v)).mul((this.mass - b.getMass()) / massSum).add(b.getVelocity()).sub(velocity);
-
-	    Vector3f dv2 = (new Vector3f(v)).mul((2 * this.mass) / massSum).add(b.getVelocity());
-
-	    //It's not enough here to only calculate the delta v. we also need delta position, aka displacement
-	    // to ensure that these are behaving as rigid bodies.
-	    // The correct method would be to scale the dv vector to fit in the intersection rectangle
-	    // but that's a pain in the ass, so for now I'm just going to displace in the predominant direction of motion
-
-	    Vector3f ds = new Vector3f();
-
-	    // If v mostly goes in the x direction, displace in x
-	    int maxComp = v.maxComponent();
-	    if (maxComp == 0) {
-		if (v.x > 0) {
-		    //pos x, so must a.maxX must have hit b.minX
-		    ds.x = this.hitBox.getMaxX() - b.hitBox.getMinX();
-		} else {
-		    ds.x = this.hitBox.getMinX() - b.hitBox.getMaxX();
-		}
-	    } else if (maxComp == 1) {
-		// If v mostly goes in the y direction displace in y
-		if (v.y > 0) {
-		    //pos x, so must a.maxX must have hit b.minX
-		    ds.y = this.hitBox.getMaxY() - b.hitBox.getMinY();
-		} else {
-		    ds.y = this.hitBox.getMinY() - b.hitBox.getMaxY();
-		}
+	    
+	    // Notice dv2 is actually = w2, because we initially assumed v2 to be 0.
+	    
+	    Vector3f dv1 = new Vector3f(v1).add(b.velocity).sub(this.velocity);
+	    Vector3f dv2 = new Vector3f(v2);
+	    
+	    //It's not enough here to only calculate the delta v. we also need to displace them so they are no longer
+	    // intersecting to ensure that these are behaving as rigid bodies.
+	    Vector3f intersection = hitBox.getIntersection(b.hitBox);
+	    
+	    float dsLength;
+	    Vector3f ds;
+	    Vector3f ds1, ds2;
+	    if (dv.length() > 0) {
+		//Project the overlap of the rectangles onto the velocity vector
+		// proj B onto A = A dot B / |A|^2 * A
+		// so let B be our overlap, and A be our velocity
+		dsLength = dv.dot(intersection) / dv.lengthSquared();
+		ds = new Vector3f(dv).mul(dsLength); //Now make ds the length of dv
+		
+		//Now split it up proportionate to v1 & v2
+		float dvTotal = dv1.length() + dv2.length();
+		ds1 = new Vector3f(ds).negate().mul(dv1.length() / dvTotal);
+		ds2 = new Vector3f(ds).mul(dv2.length() / dvTotal);
+	    } else {
+		intersection.setComponent(2, Float.MAX_VALUE); //Ignore z component for min
+		int intersectionMin = intersection.minComponent();
+		ds = (new Vector3f()).setComponent(intersectionMin, intersection.get(intersectionMin));
+		
+		//Since dv is too close to zero, instead of spliting up proportionate to v1 & v2
+		// We will just split in half
+		ds1 = new Vector3f(ds).mul(-0.5f);
+		ds2 = new Vector3f(ds).mul(0.5f);
 	    }
 	    
 	    return new CollisionEvent(
-		    new ElasticCollisionMessage(this, dv1, new Vector3f()), 
-		    new ElasticCollisionMessage(b, dv2, ds));
+		    new ElasticCollisionMessage(this, dv1, ds1), 
+		    new ElasticCollisionMessage(b, dv2, ds2));
+
 	}
 
 	return CollisionEvent.NONE;
@@ -151,17 +173,21 @@ public class RigidBody implements PhysicsEngine.Listener {
 	this.velocity = new Vector3f(velocity);
     }
     
-    public HitBox getHitBox() {
-	return hitBox;
+    public Vector3f getPosition() {
+	return new Vector3f(position);
+    }
+    
+    public void move(Vector3f ds) {
+	position.add(ds);
+	hitBox.setPosition(position);
     }
 
-    public boolean isInCollision() {
-	return !collisions.isEmpty();
+    public void setPosition(Vector3f position) {
+	this.position.set(position);
+	hitBox.setPosition(position);
     }
-
-    @Override
-    public String toString() {
-	return "RigidBody [hitBox=" + hitBox + ", mass=" + mass + ", velocity=" + velocity + ", collisions="
-		+ collisions + "]";
+    
+    public boolean isSliding() {
+	return isSliding;
     }
 }

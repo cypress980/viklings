@@ -4,9 +4,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-
 import engine.EngineComponent;
 
 /**
@@ -17,14 +14,14 @@ import engine.EngineComponent;
  *
  */
 public class PhysicsEngine implements EngineComponent {
-    private static final Logger logger = LogManager.getLogger(PhysicsEngine.class.getName());
     private static final Listener DEFAULT_LISTENER = new DummyListener();
     
     private final Map<RigidBody, Listener> listeners;
     private List<Pair<RigidBody>> possibleInteractions;
     private float updateIntervalHint;
     
-    public PhysicsEngine() {
+    public PhysicsEngine(float updateIntervalHint) {
+	this.updateIntervalHint = updateIntervalHint;
 	listeners = new HashMap<>();
     }
     
@@ -94,9 +91,5 @@ public class PhysicsEngine implements EngineComponent {
     @Override
     public float getUpdateInterval() {
 	return updateIntervalHint;
-    }
-
-    public void setUpdateIntervalHint(float updateIntervalHint) {
-	this.updateIntervalHint = updateIntervalHint;
     }
 }

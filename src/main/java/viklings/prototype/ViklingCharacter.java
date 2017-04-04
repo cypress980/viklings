@@ -22,9 +22,10 @@ public class ViklingCharacter {
     private static final float TOP_RUNNING_SPEED = 200; //pixels per second
     
     private static final float ACCELERATION = 400; // 0.5s to get to top speed
-    private static final float DECELERATION = 4000; // 0.05 s to stop from top speed
+    private static final float DECELERATION = 6000; // 0.05 s to stop from top speed
     
     private final Vector3f positionDelta;
+    
     public static enum Move {
 	STAND,
 	RIGHT,
@@ -38,7 +39,7 @@ public class ViklingCharacter {
 	this.spriteAnimator = new SpriteAnimator(sprite);
 	this.moves = new ArrayList<>();
 	this.body = body;
-	positionDelta = new Vector3f(body.getHitBox().getPosition()).sub(sprite.getPosition().getCoordinates());
+	positionDelta = new Vector3f(body.getPosition()).sub(sprite.getPosition().getCoordinates());
     }
     
     public void move(Move move) {
@@ -79,7 +80,7 @@ public class ViklingCharacter {
  	//to calculate final velocity
  	Vector3f vf;
  	
- 	if (!body.isInCollision()) {
+ 	if (!body.isSliding()) {
 
  	    // If not in collision, Process Player Control Movement
  	    dv = calculateDeltaVForMovesForInterval(interval);
@@ -96,10 +97,10 @@ public class ViklingCharacter {
 	
 	// Calculate displacement from collision or player movement control
 	Vector3f ds = body.getVelocity().mul(interval); //Displacement is sum of previous velocity * time
-	body.getHitBox().move(ds);
+	body.move(ds);
 	//Don't move sprite independently. Instead, move it to where the hitbox is explicitly, respecting the initial
 	//difference in position.
-	Vector3f spritePos = body.getHitBox().getPosition().add(positionDelta);
+	Vector3f spritePos = body.getPosition().add(positionDelta);
 	sprite.setPosition(spritePos.x, spritePos.y);
     }
     

@@ -6,8 +6,6 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
-import engine.physics.PhysicsEngine;
-
 public class GameComponentJsonSerDeTest {
     private static final Logger logger = LogManager.getLogger(GameComponentJsonSerDeTest.class.getName());
     

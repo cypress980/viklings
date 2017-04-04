@@ -4,8 +4,6 @@ import engine.GameWindow;
 import engine.game.state.Position;
 import graphics.core.Model;
 import graphics.flat.FlatRenderable;
-import org.joml.Vector2f;
-import org.joml.Vector3f;
 
 /**
  * A 2D image that can be rendered in our scene

@@ -1,5 +1,8 @@
 package graphics.core.scene;
 
+import java.util.List;
+import java.util.Map;
+
 import org.joml.Matrix4f;
 import org.joml.Vector3f;
 import org.joml.Vector4f;
@@ -9,9 +12,6 @@ import graphics.Renderer;
 import graphics.ResourceLoader;
 import graphics.core.Model;
 import graphics.core.ShaderProgram;
-
-import java.util.List;
-import java.util.Map;
 
 /**
  * TODO: This class should have three things: a shader program, a scene, and a camera

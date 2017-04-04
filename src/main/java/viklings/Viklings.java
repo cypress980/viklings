@@ -1,6 +1,14 @@
 package viklings;
 
-import static org.lwjgl.glfw.GLFW.*;
+import static org.lwjgl.glfw.GLFW.GLFW_KEY_A;
+import static org.lwjgl.glfw.GLFW.GLFW_KEY_B;
+import static org.lwjgl.glfw.GLFW.GLFW_KEY_D;
+import static org.lwjgl.glfw.GLFW.GLFW_KEY_M;
+import static org.lwjgl.glfw.GLFW.GLFW_KEY_N;
+import static org.lwjgl.glfw.GLFW.GLFW_KEY_S;
+import static org.lwjgl.glfw.GLFW.GLFW_KEY_W;
+import static org.lwjgl.glfw.GLFW.GLFW_KEY_X;
+import static org.lwjgl.glfw.GLFW.GLFW_KEY_Z;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -28,8 +36,7 @@ import graphics.core.scene.SceneRenderer;
 import graphics.core.scene.SpotLight;
 import graphics.flat.FlatRenderable;
 import graphics.flat.FlatRenderer;
-import graphics.flat.Text;
-import graphics.flat.sprite.Sprite;
+import graphics.flat.Text; 
 
 public class Viklings implements GameLogic{
 

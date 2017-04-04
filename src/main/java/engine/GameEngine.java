@@ -82,7 +82,7 @@ public class GameEngine implements Runnable {
 		EngineComponent engine = engineAccumulator.getKey();
 		
 		if (engAccum >= engine.getUpdateInterval()) {
-		    logger.debug("Refresh [{}] after [{}]", engine, engAccum);
+		    logger.trace("Refresh [{}] after [{}]", engine, engAccum);
 		    engine.update(engAccum);
 		    engAccum = 0f;
 		}

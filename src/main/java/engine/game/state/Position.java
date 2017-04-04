@@ -1,6 +1,5 @@
 package engine.game.state;
 
-import org.joml.Vector2f;
 import org.joml.Vector3f;
 
 import com.fasterxml.jackson.annotation.JsonCreator;

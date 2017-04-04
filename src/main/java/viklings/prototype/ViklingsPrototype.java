@@ -1,9 +1,18 @@
 package viklings.prototype;
 
-import static org.lwjgl.glfw.GLFW.*;
+import static org.lwjgl.glfw.GLFW.GLFW_KEY_A;
+import static org.lwjgl.glfw.GLFW.GLFW_KEY_D;
+import static org.lwjgl.glfw.GLFW.GLFW_KEY_DOWN;
+import static org.lwjgl.glfw.GLFW.GLFW_KEY_LEFT;
+import static org.lwjgl.glfw.GLFW.GLFW_KEY_RIGHT;
+import static org.lwjgl.glfw.GLFW.GLFW_KEY_S;
+import static org.lwjgl.glfw.GLFW.GLFW_KEY_SPACE;
+import static org.lwjgl.glfw.GLFW.GLFW_KEY_UP;
+import static org.lwjgl.glfw.GLFW.GLFW_KEY_W;
 
 import java.util.ArrayList;
 import java.util.List;
+
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.joml.Vector3f;
@@ -13,6 +22,7 @@ import engine.GameEngine;
 import engine.GameLogic;
 import engine.GameWindow;
 import engine.MouseInput;
+import engine.ai.IntelligenceEngine;
 import engine.physics.HitBox;
 import engine.physics.PhysicsEngine;
 import engine.physics.PhysicsEngine.Pair;
@@ -24,6 +34,7 @@ import graphics.flat.Text;
 import graphics.flat.sprite.Sprite;
 import graphics.flat.sprite.SpriteSheet;
 import viklings.prototype.ViklingCharacter.Move;
+import viklings.prototype.ai.ViklingBrain;
 
 /**
  * This is a 2D prototype for the viklings game
@@ -33,11 +44,25 @@ import viklings.prototype.ViklingCharacter.Move;
 public class ViklingsPrototype implements GameLogic {
     private static final Logger logger = LogManager.getLogger(ViklingsPrototype.class.getName());
     
-    private static final float PHYSICS_UPDATE_INTERVAL_SECONDS = 1f/59f;
+    //TODO: make this a property
+    private static final float PHYSICS_UPDATE_INTERVAL_SECONDS = 1f/60f;
+    
+    //TODO: make this a property
+    private static final float AI_UPDATE_INTERVAL_SECONDS = 1f/60f;
     
     public static void main(String[] args) {
 	try {
 	    boolean vSync = true;
+	    //TODO: I need to get rid of this game engine tutorial shit, where we call this class the game logic,
+	    // and the engine runs the logic. It's silly and confusing.
+	    // Instead, this will just be the startingpoint of the game. We will compose the game here
+	    // This means creating all the game engine components, and loading up all the game state.
+	    // Then we start the game engine.
+	    // To accomplish this, we still need to do a couple of things. 
+	    // 
+	    // 1, we need to move the controls out to their own class, and plug them into the game somehow
+	    // 2, we need to move the remaining game update logic out of this class
+	    // 3, we need to rework the graphics engine to work in the engine component framework
 	    GameLogic gameLogic = new ViklingsPrototype();
 	    GameEngine gameEng = new GameEngine("Viklings 2D", 600, 480, vSync, gameLogic);
 	    gameEng.start();
@@ -51,6 +76,8 @@ public class ViklingsPrototype implements GameLogic {
 
     private final PhysicsEngine physicsEngine;
     
+    private final IntelligenceEngine aiEngine;
+    
     private FlatRenderer gameRenderer;
     
     private List<FlatRenderable> scene = new ArrayList<>();
@@ -59,10 +86,11 @@ public class ViklingsPrototype implements GameLogic {
     
     public ViklingsPrototype() {
 	graphicsEngine = new GraphicsEngine();
-	physicsEngine = new PhysicsEngine();
-	physicsEngine.setUpdateIntervalHint(PHYSICS_UPDATE_INTERVAL_SECONDS);
+	physicsEngine = new PhysicsEngine(PHYSICS_UPDATE_INTERVAL_SECONDS);
+	aiEngine = new IntelligenceEngine(AI_UPDATE_INTERVAL_SECONDS);
 	gameEngineComponents = new ArrayList<>();
 	gameEngineComponents.add(physicsEngine);
+	gameEngineComponents.add(aiEngine);
     }
     
     ViklingCharacter bjorn;
@@ -98,9 +126,13 @@ public class ViklingsPrototype implements GameLogic {
 	
 	Vector3f punchyphysxPosition = new Vector3f(112, 100, 0);
 	HitBox punchyHitBox = new HitBox(punchyphysxPosition, 32, 12);
-	RigidBody punchyPhsxBody = new RigidBody(punchyHitBox, 40, punchyphysxPosition, new Vector3f());
+	RigidBody punchyPhsxBody = new RigidBody(punchyHitBox, 0.5f, punchyphysxPosition, new Vector3f());
 	
 	punchy = new ViklingCharacter(punchySprite, punchyPhsxBody);
+	
+	//Punchy is AI, so register with AI.
+	ViklingBrain punchyAi = new ViklingBrain(punchy, punchyPhsxBody);
+	aiEngine.addAgent(punchyAi);
 	
 	physicsEngine.registerListener(bjornPhsxBody, bjornPhsxBody);
 	physicsEngine.registerListener(punchyPhsxBody, punchyPhsxBody);
@@ -170,15 +202,15 @@ public class ViklingsPrototype implements GameLogic {
 	float dxCam = 0, dyCam = 0;
 	
 	if (window.isKeyPressed(GLFW_KEY_UP)) {
-	    dyCam = .01f;
+	    dyCam = .02f;
 	} else if (window.isKeyPressed(GLFW_KEY_DOWN)) {
-	    dyCam = -.01f;
+	    dyCam = -.02f;
 	}
 	
 	if (window.isKeyPressed(GLFW_KEY_RIGHT)) {
-	    dxCam = .01f;
+	    dxCam = .02f;
 	} else if (window.isKeyPressed(GLFW_KEY_LEFT)) {
-	    dxCam = -.01f;
+	    dxCam = -.02f;
 	}
 	
 	this.gameRenderer.moveCamera(new Vector3f(dxCam, dyCam, 0));
@@ -196,12 +228,10 @@ public class ViklingsPrototype implements GameLogic {
 		debugText.setText("Hi Cuddlebug!");
 	    }
 	    
-	    //TODO: Half way through physics refactor, gotta make it work
-	    //physicsEngine.simulatePhysics(interval);
 	    bjorn.update(interval);
 	    punchy.update(interval);
 	} catch (Exception e) {
-	    e.printStackTrace();
+	    logger.error("Exception updating game logic!", e);
 	    throw new RuntimeException();
 	}
     }
