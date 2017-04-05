@@ -42,7 +42,7 @@ public class Position {
     }
     
     public Vector3f getRotation() {
-	return rotation;
+	return new Vector3f(rotation);
     }
     
     public void setRotation(float x, float y, float z) {

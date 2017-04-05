@@ -23,10 +23,10 @@ public class SpriteSheet {
 	this.numCols = numCols;
 	this.numRows = numRows;
 	Material material = new Material(fileName);
-	this.model = buildMesh(material, numCols, numRows);
+	this.model = buildModel(material, numCols, numRows);
     }
 
-    private Model buildMesh(Material material, int numCols, int numRows) throws Exception {
+    private Model buildModel(Material material, int numCols, int numRows) throws Exception {
 
 	List<Float> positions = new ArrayList<>();
 	List<Float> textCoords = new ArrayList<>();
@@ -40,7 +40,6 @@ public class SpriteSheet {
 	float tileHeight = (float)texture.getHeight() / (float)numRows;
 
 	texture.cleanup();
-
 
 	int col = frame % numCols;
 	int row = frame / numCols;
@@ -95,9 +94,9 @@ public class SpriteSheet {
 	}
 
 	int[] indicesArr = indices.stream().mapToInt(i->i).toArray();
-	Model mesh = new Model(posArr, textCoordsArr, normals, indicesArr);
-	mesh.setMaterialAndBindTexture(material);
-	return mesh;
+	Model model = new Model(posArr, textCoordsArr, normals, indicesArr);
+	model.setMaterialAndBindTexture(material);
+	return model;
     }
 
     public int getFrame() {
@@ -111,7 +110,7 @@ public class SpriteSheet {
     public void update() throws Exception {
 	Material material = model.getMaterial();
 	model.deleteBuffers();
-	model = buildMesh(material, numCols, numRows);
+	model = buildModel(material, numCols, numRows);
     }
 
     public Model getModel() {

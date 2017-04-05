@@ -26,7 +26,7 @@ public class Camera {
     }
 
     public Vector3f getPosition() {
-        return position;
+        return new Vector3f(position); //Defensive copy
     }
 
     public void setPosition(float x, float y, float z) {

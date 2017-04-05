@@ -28,6 +28,7 @@ import engine.physics.PhysicsEngine;
 import engine.physics.PhysicsEngine.Pair;
 import engine.physics.RigidBody;
 import graphics.GraphicsEngine;
+import graphics.core.scene.Camera;
 import graphics.flat.FlatRenderable;
 import graphics.flat.FlatRenderer;
 import graphics.flat.Text;
@@ -98,13 +99,24 @@ public class ViklingsPrototype implements GameLogic {
 
     private final ArrayList<Pair<RigidBody>> physicsInteractions = new ArrayList<>();
     private Text debugText;
+
+    private Camera camera;
+
+    private TerrainGenerator terrainGenerator;
     
+    //TODO: This entire method basically just does dependency injection and game setup
+    // Introduce a dependency injection framework so that we don't have to have all this code sitting where game logic belongs
+    // And work on a system to load game data declaratively, so that we can load 
     @Override
     public void init(GameWindow window) throws Exception {
 	// Set up scene renderer
-	gameRenderer = new FlatRenderer();
+	camera = new Camera();
+	gameRenderer = new FlatRenderer(camera);
 	debugText = new Text("Hi Cuddlebug");
 	scene.add(debugText);
+	
+	//Terrain Generator
+	terrainGenerator = new TerrainGenerator(camera);
 	
 	// Bjorn
 	SpriteSheet bjornSpriteSheet = new SpriteSheet("textures/sprites/vikling.png", 9, 1);
@@ -140,6 +152,11 @@ public class ViklingsPrototype implements GameLogic {
 	physicsInteractions.add(new Pair<>(bjornPhsxBody, punchyPhsxBody));
 	physicsEngine.setPossibleInteractions(physicsInteractions);
 	
+	//TODO: Add Terrain
+	FlatRenderable terrain = terrainGenerator.generateTerrain();
+	scene.add(terrain);
+	
+	//Add characters
 	scene.add(bjornSprite);
 	scene.add(punchySprite);
 	
@@ -213,7 +230,7 @@ public class ViklingsPrototype implements GameLogic {
 	    dxCam = -.02f;
 	}
 	
-	this.gameRenderer.moveCamera(new Vector3f(dxCam, dyCam, 0));
+	camera.movePosition(dxCam, dyCam, 0);
     }
 
     @Override
