@@ -46,7 +46,7 @@ public class ViklingsPrototype implements GameLogic {
     private static final Logger logger = LogManager.getLogger(ViklingsPrototype.class.getName());
     
     //TODO: make this a property
-    private static final float PHYSICS_UPDATE_INTERVAL_SECONDS = 1f/60f;
+    private static final float PHYSICS_UPDATE_INTERVAL_SECONDS = 1f/120f;
     
     //TODO: make this a property
     private static final float AI_UPDATE_INTERVAL_SECONDS = 1f/60f;
@@ -112,15 +112,13 @@ public class ViklingsPrototype implements GameLogic {
 	// Set up scene renderer
 	camera = new Camera();
 	gameRenderer = new FlatRenderer(camera);
-	debugText = new Text("Hi Cuddlebug");
-	scene.add(debugText);
 	
 	//Terrain Generator
 	terrainGenerator = new TerrainGenerator(camera);
 	
 	// Bjorn
 	SpriteSheet bjornSpriteSheet = new SpriteSheet("textures/sprites/vikling.png", 9, 1);
-	Sprite bjornSprite = new Sprite(bjornSpriteSheet, 0.1f);
+	Sprite bjornSprite = new Sprite(bjornSpriteSheet, 0.2f);
 	bjornSprite.setFrame(1);
 	bjornSprite.setPosition(50, 50);
 	
@@ -132,7 +130,7 @@ public class ViklingsPrototype implements GameLogic {
 	
 	// Punchy
 	SpriteSheet punchySpriteSheet = new SpriteSheet("textures/sprites/vikling.png", 9, 1);
-	Sprite punchySprite = new Sprite(punchySpriteSheet, 0.2f);
+	Sprite punchySprite = new Sprite(punchySpriteSheet, 0.21f);
 	punchySprite.setFrame(1);
 	punchySprite.setPosition(100, 100);
 	
@@ -151,14 +149,23 @@ public class ViklingsPrototype implements GameLogic {
 	
 	physicsInteractions.add(new Pair<>(bjornPhsxBody, punchyPhsxBody));
 	physicsEngine.setPossibleInteractions(physicsInteractions);
-	
-	//TODO: Add Terrain
+	//Add Terrain
 	FlatRenderable terrain = terrainGenerator.generateTerrain();
 	scene.add(terrain);
+	
+	//Add items to the scene
+	SpriteSheet goldSpriteSheet = new SpriteSheet("textures/gold.png", 1, 1);
+	Sprite goldSprite = new Sprite(goldSpriteSheet, 0.11f);
+	goldSprite.setPosition(80f, 80f);
+	scene.add(goldSprite);
 	
 	//Add characters
 	scene.add(bjornSprite);
 	scene.add(punchySprite);
+	
+	//Add Debug text
+	debugText = new Text("Hi Cuddlebug", 0.3f);
+	scene.add(debugText);
 	
 	gameRenderer.setScene(scene);
 	gameRenderer.setWindowHeightPx(window.getHeight());
