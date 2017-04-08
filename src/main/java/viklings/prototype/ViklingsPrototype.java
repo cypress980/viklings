@@ -106,7 +106,7 @@ public class ViklingsPrototype implements GameLogic {
     
     //TODO: This entire method basically just does dependency injection and game setup
     // Introduce a dependency injection framework so that we don't have to have all this code sitting where game logic belongs
-    // And work on a system to load game data declaratively, so that we can load 
+    // And work on a system to load the game declaratively
     @Override
     public void init(GameWindow window) throws Exception {
 	// Set up scene renderer
