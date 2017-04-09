@@ -60,4 +60,9 @@ public class Sprite implements FlatRenderable {
     public Model getModel() {
 	return spriteSheet.getModel();
     }
+
+    @Override
+    public void setZOrder(float zOrder) {
+	this.position.setCoordinates(position.getCoordinates().setComponent(2, zOrder));
+    }
 }

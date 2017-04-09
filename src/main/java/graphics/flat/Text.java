@@ -14,17 +14,11 @@ public class Text implements FlatRenderable {
     private Position position;
     
     public Text(String text) throws Exception {
-        this(text, 0f);
-    }
-    
-    public Text(String text, float z) throws Exception {
         this.text = text;
         this.font = new Font();
         this.model = font.buildMesh(text);
         this.position = new Position();
-        this.position.setCoordinates(0, 0, z);
     }
-    
     
     public String getText() {
         return text;
@@ -59,5 +53,10 @@ public class Text implements FlatRenderable {
     @Override
     public Position getPosition() {
 	return position;
+    }
+
+    @Override
+    public void setZOrder(float zOrder) {
+	this.position.setCoordinates(position.getCoordinates().setComponent(2, zOrder));
     }
 }

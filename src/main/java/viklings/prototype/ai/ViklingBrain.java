@@ -4,16 +4,16 @@ import org.joml.Vector3f;
 
 import engine.ai.IntelligentAgent;
 import engine.physics.RigidBody;
-import viklings.prototype.ViklingCharacter;
-import viklings.prototype.ViklingCharacter.Move;
+import viklings.prototype.Character;
+import viklings.prototype.Character.Move;
 
 public class ViklingBrain implements IntelligentAgent {
     
     private final Vector3f initialPos;
-    private final ViklingCharacter body;
+    private final Character body;
     private final RigidBody decisionContext;
     
-    public ViklingBrain(ViklingCharacter body, RigidBody decisionContext) {
+    public ViklingBrain(Character body, RigidBody decisionContext) {
 	this.body = body;
 	this.decisionContext = decisionContext;
 	this.initialPos = decisionContext.getPosition();
@@ -26,20 +26,25 @@ public class ViklingBrain implements IntelligentAgent {
     public void think() {
 	float distance = decisionContext.getPosition().distance(initialPos);
 	if (distance < 1 || decisionContext.isSliding()) {
-	    body.move(Move.STAND);
 	    return;
 	}
 	
 	if (decisionContext.getPosition().x < initialPos.x) {
-	    body.move(Move.RIGHT);
+	    body.move(Move.RIGHT, true);
 	} else if (decisionContext.getPosition().x > initialPos.x) {
-	    body.move(Move.LEFT);
+	    body.move(Move.LEFT, true);
+	} else {
+	    body.move(Move.RIGHT, false);
+	    body.move(Move.LEFT, false);
 	}
 	
 	if (decisionContext.getPosition().y < initialPos.y) {
-	    body.move(Move.DOWN);
+	    body.move(Move.DOWN, true);
 	} else if (decisionContext.getPosition().y > initialPos.y) {
-	    body.move(Move.UP);
+	    body.move(Move.UP, true);
+	} else {
+	    body.move(Move.UP, false);
+	    body.move(Move.DOWN, false);
 	}
     }
 

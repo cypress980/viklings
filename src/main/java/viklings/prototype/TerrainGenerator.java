@@ -8,7 +8,7 @@ import org.joml.Vector4f;
 import engine.game.state.Material;
 import engine.game.state.Position;
 import graphics.core.Model;
-import graphics.core.scene.Camera;
+import graphics.flat.Camera;
 import graphics.flat.FlatRenderable;
 
 public class TerrainGenerator {
@@ -129,6 +129,11 @@ public class TerrainGenerator {
 	//TODO: Split game world up into chunks and only load the 9 at a time (the one where the player is, the 4 adjacent, and the 4 corners
 	private Vector4f getChunkRectangle(Camera camera, float tileHeight, float tileWidth) {
 	    return new Vector4f(0f, 0f, 600f, 480f);
+	}
+
+	@Override
+	public void setZOrder(float zOrder) {
+	    this.position.setCoordinates(position.getCoordinates().setComponent(2, zOrder));
 	}
 
     }

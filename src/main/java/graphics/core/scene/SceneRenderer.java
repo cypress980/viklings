@@ -12,6 +12,7 @@ import graphics.Renderer;
 import graphics.ResourceLoader;
 import graphics.core.Model;
 import graphics.core.ShaderProgram;
+import graphics.flat.Camera;
 
 /**
  * TODO: This class should have three things: a shader program, a scene, and a camera
