@@ -34,8 +34,8 @@ public class FlatRenderer implements Renderer {
     public void loadShaders() throws Exception {
         hudShaderProgram = new ShaderProgram();
         ResourceLoader resLoader = new ResourceLoader();
-        hudShaderProgram.createVertexShader(resLoader.loadToString("shaders/hud/hud_vertex.vs"));
-        hudShaderProgram.createFragmentShader(resLoader.loadToString("shaders/hud/hud_fragment.fs"));
+        hudShaderProgram.createVertexShader(resLoader.loadToString("shaders/flat/vertex.vs"));
+        hudShaderProgram.createFragmentShader(resLoader.loadToString("shaders/flat/fragment.fs"));
         hudShaderProgram.link();
         
         // Create uniforms for orthographic-model projection matrix and base color
