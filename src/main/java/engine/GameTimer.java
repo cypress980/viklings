@@ -1,24 +1,24 @@
 package engine;
 
 public class GameTimer {
-    private double lastLoopTime;
+    private double lastLoopTimeSeconds;
     
-    public void init() {
-        lastLoopTime = getTime();
+    public void startTimer() {
+        lastLoopTimeSeconds = getTimeSeconds();
     }
-
-    public double getTime() {
+    
+    public double getTimeSeconds() {
         return System.nanoTime() / 1_000_000_000.0;
     }
 
-    public float getElapsedTime() {
-        double time = getTime();
-        float elapsedTime = (float) (time - lastLoopTime);
-        lastLoopTime = time;
+    public float getElapsedTimeSeconds() {
+        double time = getTimeSeconds();
+        float elapsedTime = (float) (time - lastLoopTimeSeconds);
+        lastLoopTimeSeconds = time;
         return elapsedTime;
     }
 
-    public double getLastLoopTime() {
-        return lastLoopTime;
+    public double getLastLoopTimeSeconds() {
+        return lastLoopTimeSeconds;
     }
 }

@@ -40,4 +40,11 @@ public class GraphicsEngine {
 	    renderer.render();
 	}
     }
+
+    public void removeAllRenderers() {
+	for(Renderer r : renderers) {
+	    r.cleanupShaders();
+	}
+	renderers.clear();
+    }
 }
