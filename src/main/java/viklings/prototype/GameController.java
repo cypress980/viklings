@@ -8,6 +8,7 @@ import static org.lwjgl.glfw.GLFW.GLFW_KEY_LEFT;
 import static org.lwjgl.glfw.GLFW.GLFW_KEY_RIGHT;
 import static org.lwjgl.glfw.GLFW.GLFW_KEY_S;
 import static org.lwjgl.glfw.GLFW.GLFW_KEY_SPACE;
+import static org.lwjgl.glfw.GLFW.GLFW_KEY_T;
 import static org.lwjgl.glfw.GLFW.GLFW_KEY_UP;
 import static org.lwjgl.glfw.GLFW.GLFW_KEY_W;
 import static org.lwjgl.glfw.GLFW.GLFW_PRESS;
@@ -53,6 +54,10 @@ public class GameController implements KeyboardListener {
 	    guy.move(Move.RIGHT, true);
 	} else if (key == GLFW_KEY_D && action == GLFW_RELEASE) {
 	    guy.move(Move.RIGHT, false);
+	}
+	
+	if (key == GLFW_KEY_T && action == GLFW_PRESS) {
+	    guy.talk();
 	}
 	
 	// control camera

@@ -17,7 +17,7 @@ import engine.GameWindow;
  * This class allows us to register listeners for keyboard and mouse events without extending LWJGL classes to do so
  * Instead we define our own interfaces, and tuck in the LWJGL inheritance inside this class.
  * 
- * TODO: We haven't actually added a way to unregister listeners - once you add a listener, it's listener.
+ * TODO: We haven't actually added a way to unregister listeners - once you add a listener, it's listening.
  * Simply removing the listener, and letting the anonymous inner class get GC'd will result in errors.
  * We will need to grab the anon callbacks out of the map with the listener key, and unregister them with LWJGL
  * 
@@ -74,7 +74,7 @@ public class ControlsEngine {
         //Register callback with LWJGL
         glfwSetMouseButtonCallback(window.getWindowHandle(), mouseButtonCallback);
         
-        //Add listener and both callback passthrus to our map
+        //Add listener and both callback passthroughs to our map
         mouseListeners.put(controller, new Pair<>(cursorPosCallback, mouseButtonCallback));
     }
     

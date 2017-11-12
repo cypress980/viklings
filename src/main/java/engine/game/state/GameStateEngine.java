@@ -12,7 +12,7 @@ public class GameStateEngine implements EngineComponent {
     
     public GameStateEngine(float updateIntervalSeconds) {
 	this.updateIntervalSeconds = updateIntervalSeconds;
-	this.updatableItems = new ArrayList<>();
+	updatableItems = new ArrayList<>();
     }
     
     public void addUpdatableItem(Updatable item) {
@@ -27,8 +27,7 @@ public class GameStateEngine implements EngineComponent {
     }
 
     @Override
-    public float getUpdateInterval() {
-	return updateIntervalSeconds;
+    public boolean shouldUpdate(float interval)  {
+	return interval >= updateIntervalSeconds;
     }
-
 }

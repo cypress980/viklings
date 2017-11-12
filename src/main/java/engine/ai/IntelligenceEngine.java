@@ -18,7 +18,10 @@ public class IntelligenceEngine implements EngineComponent {
     @Override
     public void update(float interval) throws Exception {
 	for (IntelligentAgent agent : agents) {
-	    agent.think();
+	    //If agent is thinking, skip this tick
+	    if (!agent.isThinking()) {
+		agent.think();
+	    }
 	}
     }
 
@@ -29,10 +32,9 @@ public class IntelligenceEngine implements EngineComponent {
     public void removeAgent(IntelligentAgent agent) {
 	agents.remove(agent);
     }
-    
+
     @Override
-    public float getUpdateInterval() {
-	return updateInterval;
+    public boolean shouldUpdate(float interval) {
+	return interval >= updateInterval;
     }
-    
 }

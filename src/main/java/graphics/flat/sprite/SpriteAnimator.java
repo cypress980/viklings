@@ -1,5 +1,7 @@
 package graphics.flat.sprite;
 
+import engine.game.state.Position;
+
 public class SpriteAnimator {
     
     private int walkMin = 3, walkMax = 8; // [min, max]
@@ -68,5 +70,13 @@ public class SpriteAnimator {
 	this.sprite.setFrame(frame);
 	currentFrame = frame;
 	secondsSinceFrameChange = 0;
+    }
+
+    public Position getPosition() {
+	return sprite.getPosition();
+    }
+
+    public void setPosition(float x, float y) {
+	sprite.setPosition(x, y);
     }
 }

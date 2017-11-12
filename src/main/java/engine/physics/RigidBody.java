@@ -25,12 +25,14 @@ public class RigidBody implements PhysicsEngine.Listener {
 
     private final Vector3f position;
     
+    private long lastCollisionMs;
+    
     public RigidBody(HitBox hitBox, float mass, Vector3f position, Vector3f velocity) {
 	this.hitBox = hitBox;
 	this.mass = mass;
 	this.velocity = velocity;
 	this.collisionEvents = new ArrayList<>();
-	this.position = new Vector3f(position);
+	this.position = position;
     }
     
     @Override
@@ -72,7 +74,7 @@ public class RigidBody implements PhysicsEngine.Listener {
 	
 	//Finally, displace by velocity * interval
 	Vector3f ds = new Vector3f(velocity).mul(interval);
-	this.hitBox.move(ds);
+	position.add(ds);
     }
     
     public CollisionEvent getCollision(RigidBody b) {
@@ -179,12 +181,10 @@ public class RigidBody implements PhysicsEngine.Listener {
     
     public void move(Vector3f ds) {
 	position.add(ds);
-	hitBox.setPosition(position);
     }
 
     public void setPosition(Vector3f position) {
 	this.position.set(position);
-	hitBox.setPosition(position);
     }
     
     public boolean isSliding() {

@@ -1,27 +1,36 @@
 package viklings.prototype;
 
+import java.util.Objects;
+
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.joml.Vector3f;
 
 import engine.game.state.Updatable;
+import engine.physics.HitBox;
 import engine.physics.RigidBody;
-import graphics.flat.sprite.Sprite;
 import graphics.flat.sprite.SpriteAnimator;
+import viklings.prototype.setup.Inventory;
+import viklings.prototype.setup.Needs;
 
 public class Character implements Updatable {
     private static final Logger logger = LogManager.getLogger(Character.class.getName());
     
-    private static final float TOP_RUNNING_SPEED = 200; //pixels per second
-    private static final float ACCELERATION = 400; // 0.5s to get to top speed
-    private static final float DECELERATION = 6000; // 0.05 s to stop from top speed
+    private static final float TOP_RUNNING_SPEED = 100; //pixels per second
+    private static final float ACCELERATION = 200; // 0.5s to get to top speed
+    private static final float DECELERATION = 3000; // 0.05 s to stop from top speed
     
-    private final Sprite sprite;
-    private final SpriteAnimator spriteAnimator;
+    private final SpriteAnimator animation;
     private final RigidBody body;
     private final String name;
     
     private final Vector3f positionDelta;
+
+    private Communication voice;
+
+    private Needs needs;
+
+    private Inventory inventory;
     
     public static enum Move {
 	STAND,
@@ -30,46 +39,70 @@ public class Character implements Updatable {
 	UP,
 	DOWN;
     }
+
+    public static Builder newBuilder() {
+	return new Builder();
+    }
     
-    public Character(Sprite sprite, RigidBody body, final String name) {
+    private Character(
+	    String name, 
+	    SpriteAnimator animation, 
+	    RigidBody body, 
+	    Communication voice, 
+	    HitBox talkingHitBox, 
+	    Needs needs, 
+	    Inventory inventory) {
 	this.name = name;
-	this.sprite = sprite;
-	this.spriteAnimator = new SpriteAnimator(sprite);
+	this.animation = animation;
 	this.body = body;
-	positionDelta = new Vector3f(body.getPosition()).sub(sprite.getPosition().getCoordinates());
+	this.voice = voice;
+	this.talkingHitBox = talkingHitBox;
+	this.needs = needs;
+	this.inventory = inventory;
+	positionDelta = new Vector3f(body.getPosition()).sub(animation.getPosition().getCoordinates());
     }
     
     private boolean moveRight = false;
     private boolean moveLeft = false;
     private boolean moveUp = false;
     private boolean moveDown = false;
+
+    private final HitBox talkingHitBox;
+    
+    public void stop() {
+	moveRight = false;
+	moveLeft = false;
+	moveUp = false;
+	moveDown = false;
+	animation.stopAnimation();
+    }
     
     public void move(Move move, boolean go) {
 	logger.debug("{} move event [{}], [{}]", name, move, go);
 	switch(move) {
 	case RIGHT:
-	    spriteAnimator.startAnimation(1);
+	    animation.startAnimation(1);
 	    moveRight = go;
 	    if (go) {
 		moveLeft = false;
 	    }
 	    break;
 	case LEFT:
-	    spriteAnimator.startAnimation(1);
+	    animation.startAnimation(1);
 	    moveLeft = go;
 	    if (go) {
 		moveRight = false;
 	    }
 	    break;
 	case UP:
-	    spriteAnimator.startAnimation(1);
+	    animation.startAnimation(1);
 	    moveUp = go;
 	    if (go) {
 		moveDown = false;
 	    }
 	    break;
 	case DOWN:
-	    spriteAnimator.startAnimation(1);
+	    animation.startAnimation(1);
 	    moveDown = go;
 	    if (go) {
 		moveUp = false;
@@ -108,10 +141,10 @@ public class Character implements Updatable {
 	//Don't move sprite independently. Instead, move it to where the hitbox is explicitly, respecting the initial
 	//difference in position.
 	Vector3f spritePos = body.getPosition().add(positionDelta);
-	sprite.setPosition(spritePos.x, spritePos.y);
+	animation.setPosition(spritePos.x, spritePos.y);
 	
 	//Update animation
-	spriteAnimator.update(interval);
+	animation.update(interval);
     }
     
     private Vector3f calculateDeltaVForMovesForInterval(float interval) {
@@ -137,7 +170,7 @@ public class Character implements Updatable {
 	}
 	
 	if (!(moveUp || moveDown || moveRight || moveLeft)) {
-	    spriteAnimator.stopAnimation();
+	    animation.stopAnimation();
 	}
 	
 	// first x
@@ -191,5 +224,94 @@ public class Character implements Updatable {
 	logger.trace("{} moves dv [{}] for interval [{}]", name, movesDv, interval);
 	
 	return movesDv;
+    }
+
+    public void talk() {
+	logger.debug("{}: Hi!", name);
+	voice.say(this, Communication.Message.GREET, talkingHitBox);
+    }
+    
+    public static class Builder {
+	private Builder() {};
+	
+	private String name = null;
+	private SpriteAnimator animation = null;
+	private RigidBody body = null;
+	private Communication voice = null;
+	private HitBox talkingHitBox = null;
+	private Needs needs;
+	private Inventory inventory;
+	
+	public Character build() {
+	    Objects.nonNull(name);
+	    Objects.nonNull(animation);
+	    Objects.nonNull(body);
+	    Objects.nonNull(voice);
+	    Objects.nonNull(talkingHitBox);
+	    return new Character(
+		    name,
+		    animation,
+		    body,
+		    voice,
+		    talkingHitBox,
+		    needs,
+		    inventory
+		    );
+	}
+
+	public String getName() {
+	    return name;
+	}
+
+	public Builder setName(String name) {
+	    this.name = name;
+	    return this;
+	}
+	
+	public Builder setAnimation(SpriteAnimator animation) {
+	    this.animation = animation;
+	    return this;
+	}
+
+	public Builder setBody(RigidBody body) {
+	    this.body = body;
+	    return this;
+	}
+
+	public Builder setTalkingHitBox(HitBox talkingHitBox) {
+	    this.talkingHitBox = talkingHitBox;
+	    return this;
+	}
+	
+	public Builder setVoice(Communication voice) {
+	    this.voice = voice;
+	    return this;
+	}
+	
+	public Builder setNeeds(Needs needs) {
+	    this.needs = needs;
+	    return this;
+	}
+
+	public Builder setInventory(Inventory inventory) {
+	    this.inventory = inventory;
+	    return this;
+	}
+	
+	public SpriteAnimator getAnimation() {
+	    return animation;
+	}
+
+	public RigidBody getBody() {
+	    return body;
+	}
+
+	public Communication getVoice() {
+	    return voice;
+	}
+
+	public HitBox getTalkingHitBox() {
+	    return talkingHitBox;
+	}
     }
 }
