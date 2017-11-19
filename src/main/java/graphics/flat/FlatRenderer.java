@@ -1,7 +1,5 @@
 package graphics.flat;
 
-import java.util.List;
-
 import org.joml.Matrix4f;
 import org.joml.Vector3f;
 
@@ -10,7 +8,6 @@ import graphics.Renderer;
 import graphics.ResourceLoader;
 import graphics.core.Model;
 import graphics.core.ShaderProgram;
-import graphics.core.scene.Camera;
 
 public class FlatRenderer implements Renderer {
     
@@ -20,7 +17,7 @@ public class FlatRenderer implements Renderer {
     
     private int windowWidthPx;
     
-    private List<? extends FlatRenderable> scene;
+    private FlatScene scene;
 
     private final Matrix4f orthoMatrix;
     
@@ -37,8 +34,8 @@ public class FlatRenderer implements Renderer {
     public void loadShaders() throws Exception {
         hudShaderProgram = new ShaderProgram();
         ResourceLoader resLoader = new ResourceLoader();
-        hudShaderProgram.createVertexShader(resLoader.loadToString("shaders/hud/hud_vertex.vs"));
-        hudShaderProgram.createFragmentShader(resLoader.loadToString("shaders/hud/hud_fragment.fs"));
+        hudShaderProgram.createVertexShader(resLoader.loadToString("shaders/flat/vertex.vs"));
+        hudShaderProgram.createFragmentShader(resLoader.loadToString("shaders/flat/fragment.fs"));
         hudShaderProgram.link();
         
         // Create uniforms for orthographic-model projection matrix and base color
@@ -53,7 +50,7 @@ public class FlatRenderer implements Renderer {
         
         //TODO: we only need to make this call when the window size changes
         Matrix4f ortho = getOrthoProjectionMatrix(0, windowWidthPx, windowHeightPx, 0);
-        for (FlatRenderable item : scene) {
+        for (FlatRenderable item : scene.getSceneItems()) {
             Model model = item.getModel();
             // Set orthographic and model matrix for this HUD item
             Matrix4f projModelMatrix = getOrthoProjModelMatrix(item.getPosition(), ortho);
@@ -98,7 +95,7 @@ public class FlatRenderer implements Renderer {
         this.windowWidthPx = windowWidthPx;
     }
     
-    public void setScene(List<? extends FlatRenderable> scene) {
+    public void setScene(FlatScene scene) {
 	this.scene = scene;
     }
     

@@ -1,7 +1,31 @@
 package graphics.core;
 
-import static org.lwjgl.opengl.GL20.*;
 import static org.lwjgl.opengl.GL11.GL_TRUE;
+import static org.lwjgl.opengl.GL20.GL_COMPILE_STATUS;
+import static org.lwjgl.opengl.GL20.GL_FRAGMENT_SHADER;
+import static org.lwjgl.opengl.GL20.GL_LINK_STATUS;
+import static org.lwjgl.opengl.GL20.GL_VALIDATE_STATUS;
+import static org.lwjgl.opengl.GL20.GL_VERTEX_SHADER;
+import static org.lwjgl.opengl.GL20.glAttachShader;
+import static org.lwjgl.opengl.GL20.glCompileShader;
+import static org.lwjgl.opengl.GL20.glCreateProgram;
+import static org.lwjgl.opengl.GL20.glCreateShader;
+import static org.lwjgl.opengl.GL20.glDeleteProgram;
+import static org.lwjgl.opengl.GL20.glDetachShader;
+import static org.lwjgl.opengl.GL20.glGetProgramInfoLog;
+import static org.lwjgl.opengl.GL20.glGetProgrami;
+import static org.lwjgl.opengl.GL20.glGetShaderInfoLog;
+import static org.lwjgl.opengl.GL20.glGetShaderi;
+import static org.lwjgl.opengl.GL20.glGetUniformLocation;
+import static org.lwjgl.opengl.GL20.glLinkProgram;
+import static org.lwjgl.opengl.GL20.glShaderSource;
+import static org.lwjgl.opengl.GL20.glUniform1f;
+import static org.lwjgl.opengl.GL20.glUniform1i;
+import static org.lwjgl.opengl.GL20.glUniform3f;
+import static org.lwjgl.opengl.GL20.glUniform4f;
+import static org.lwjgl.opengl.GL20.glUniformMatrix4fv;
+import static org.lwjgl.opengl.GL20.glUseProgram;
+import static org.lwjgl.opengl.GL20.glValidateProgram;
 
 import java.nio.FloatBuffer;
 import java.util.HashMap;
@@ -15,9 +39,6 @@ import org.joml.Vector4f;
 import org.lwjgl.system.MemoryStack;
 
 import engine.game.state.Material;
-import graphics.core.scene.DirectionalLight;
-import graphics.core.scene.PointLight;
-import graphics.core.scene.SpotLight;
 
 /** 
  * This is a bit of a shader god class. It defines all of the interactions that you can have with 
@@ -195,54 +216,10 @@ public class ShaderProgram {
         createUniform(uniformName + ".direction");
         createUniform(uniformName + ".intensity");
     }
-    
-    public void setUniform(String uniformName, DirectionalLight dirLight) {
-        setUniform(uniformName + ".color", dirLight.getColor() );
-        setUniform(uniformName + ".direction", dirLight.getDirection());
-        setUniform(uniformName + ".intensity", dirLight.getIntensity());
-    }
-    
-    public void setUniform(String uniformName, SpotLight spotLight) {
-        setUniform(uniformName + ".pl", spotLight.getPointLight());
-        setUniform(uniformName + ".conedir", spotLight.getConeDirection());
-        setUniform(uniformName + ".cutoff", spotLight.getCutOff());
-    }
-    
-    public void setUniform(String uniformName, PointLight pointLight) {
-        setUniform(uniformName + ".color", pointLight.getColor() );
-        setUniform(uniformName + ".position", pointLight.getPosition());
-        setUniform(uniformName + ".intensity", pointLight.getIntensity());
-        PointLight.Attenuation att = pointLight.getAttenuation();
-        setUniform(uniformName + ".att.constant", att.getConstant());
-        setUniform(uniformName + ".att.linear", att.getLinear());
-        setUniform(uniformName + ".att.exponent", att.getExponent());
-    }
 
     public void setUniform(String uniformName, Material material) {
         setUniform(uniformName + ".color", material.getColor() );
         setUniform(uniformName + ".useColor", material.isTextured() ? 0 : 1);
         setUniform(uniformName + ".reflectance", material.getReflectance());
-    }
-    
-    public void setUniform(String uniformName, PointLight[] pointLights) {
-        int numLights = pointLights != null ? pointLights.length : 0;
-        for (int i = 0; i < numLights; i++) {
-            setUniform(uniformName, pointLights[i], i);
-        }
-    }
-
-    public void setUniform(String uniformName, PointLight pointLight, int pos) {
-        setUniform(uniformName + "[" + pos + "]", pointLight);
-    }
-
-    public void setUniform(String uniformName, SpotLight[] spotLights) {
-        int numLights = spotLights != null ? spotLights.length : 0;
-        for (int i = 0; i < numLights; i++) {
-            setUniform(uniformName, spotLights[i], i);
-        }
-    }
-
-    public void setUniform(String uniformName, SpotLight spotLight, int pos) {
-        setUniform(uniformName + "[" + pos + "]", spotLight);
     }
 }

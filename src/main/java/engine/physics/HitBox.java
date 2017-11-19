@@ -4,11 +4,9 @@ import org.joml.Vector3f;
 
 public class HitBox {
     
-    private float minX, maxX, minY, maxY;
-    
     private final Vector3f position;
     
-    private final float height, width;
+    private final float height, width, offsetY, offsetX;
     
     /**
      * 
@@ -17,63 +15,49 @@ public class HitBox {
      * @param width width of hit box
      */
     public HitBox(Vector3f position, float height, float width) {
-	this.position = new Vector3f(position);
-	
-	this.height = height;
-	this.width = width;
-	
-	minX = position.x;
-	minY = position.y;
-	
-	maxX = minX + width;
-	maxY = minY + height;
+	this(position, height, width, 0, 0);
+    }
+    
+    public HitBox(Vector3f position, float height, float width, float offsetY, float offsetX) {
+	// By taking the raw Vector3f position, we anchor the hitbox to this. Meaning that this
+	// position be changed, and we follow it. This is by design.
+	this.position = position;
+	this.height = height + offsetY;
+	this.width = width + offsetX;
+	this.offsetY = offsetY;
+	this.offsetX = offsetX;
     }
     
     public float getMinX() {
-        return minX;
+        return position.x + offsetX;
     }
 
     public float getMaxX() {
-        return maxX;
+        return position.x + width;
     }
 
     public float getMinY() {
-        return minY;
+        return position.y + offsetY;
     }
 
     public float getMaxY() {
-        return maxY;
-    }
-    
-    public void move(Vector3f displacement) {
-	position.add(displacement);
-	
-	minX += displacement.x;
-	minY += displacement.y;
-	maxX += displacement.x;
-	maxY += displacement.y;
+        return position.y + height;
     }
     
     public Vector3f getPosition() {
 	return new Vector3f(position); //Defensive Copy
     }
     
-    public void setPosition(Vector3f position) {
-	this.position.set(position);
-	
-	minX = position.x;
-	minY = position.y;
-	
-	maxX = minX + width;
-	maxY = minY + height;
+    public boolean isBounded(double xpos, double ypos) {
+	return (xpos >= getMinX() && xpos <= getMaxX() && ypos >= getMinY() && ypos <= getMaxY());
     }
 
     public boolean isCollision(HitBox that) {
 	
-	return this.maxX > that.minX &&
-		this.minX < that.maxX &&
-		this.maxY > that.minY &&
-		this.minY < that.maxY;              
+	return this.getMaxX() > that.getMinX() &&
+		this.getMinX() < that.getMaxX() &&
+		this.getMaxY() > that.getMinY() &&
+		this.getMinY() < that.getMaxY();              
 
     }
     
@@ -85,24 +69,24 @@ public class HitBox {
 	}
 	
 	//If we're intersecting, find the intersection
-	if (this.maxX >= that.minX && this.minX <= that.minX) {
+	if (this.getMaxX() >= that.getMinX() && this.getMinX() <= that.getMinX()) {
 	    // x-->+
 	    // [this [-->] that] +
-	    intersection.x = (this.maxX - that.minX);
-	} else if (that.maxX >= this.minX && that.minX <= this.minX) {
+	    intersection.x = (this.getMaxX() - that.getMinX());
+	} else if (that.getMaxX() >= this.getMinX() && that.getMinX() <= this.getMinX()) {
 	    // x-->+
 	    // [that [<--] this] -
-	    intersection.x = (this.minX - that.maxX);
+	    intersection.x = (this.getMinX() - that.getMaxX());
 	}
 	
-	if (this.maxY >= that.minY && this.maxY <= that.maxY) {
+	if (this.getMaxY() >= that.getMinY() && this.getMaxY() <= that.getMaxY()) {
 	    // y-->+
 	    // [this [-->] that] +
-	    intersection.y = (this.maxY - that.minY);
-	} else if (that.maxY >= this.minY && that.minY <= this.minY) {
+	    intersection.y = (this.getMaxY() - that.getMinY());
+	} else if (that.getMaxY() >= this.getMinY() && that.getMinY() <= this.getMinY()) {
 	    // y-->+
 	    // [that [<--] this] -
-	    intersection.y = (this.minY - that.maxY);
+	    intersection.y = (this.getMinY() - that.getMaxY());
 	}
 	
 	return intersection;
@@ -110,7 +94,7 @@ public class HitBox {
 
     @Override
     public String toString() {
-	return "HitBox [minX=" + minX + ", maxX=" + maxX + ", minY=" + minY + ", maxY=" + maxY + ", position="
+	return "HitBox [minX=" + getMinX() + ", maxX=" + getMaxX() + ", minY=" + getMinY() + ", maxY=" + getMaxY() + ", position="
 		+ position + "]";
     }
 }

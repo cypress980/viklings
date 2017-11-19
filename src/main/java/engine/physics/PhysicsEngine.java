@@ -89,7 +89,7 @@ public class PhysicsEngine implements EngineComponent {
     }
 
     @Override
-    public float getUpdateInterval() {
-	return updateIntervalHint;
+    public boolean shouldUpdate(float interval) {
+	return interval >= updateIntervalHint;
     }
 }
