@@ -7,6 +7,10 @@
 target
 bin
 
+# Intellij project files
+.idea
+*.iml
+
 # vim swap files
 *.swp
 

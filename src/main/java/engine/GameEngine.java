@@ -22,10 +22,10 @@ public class GameEngine implements Runnable {
     
     private GraphicsEngine graphicsEngine;
     
-    public GameEngine(GameWindow gameWindow) {
+    public GameEngine(GameWindow window, GameTimer timer) {
 	gameLoopThread = new Thread(this, "GAME_LOOP_THREAD");
-	window = gameWindow;
-	timer = new GameTimer();
+	this.window = window;
+	this.timer = timer;
 	engineAccumulators = new HashMap<>();
 	engineComponents = new HashSet<>();
     }

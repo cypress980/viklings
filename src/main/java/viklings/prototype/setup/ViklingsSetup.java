@@ -1,6 +1,7 @@
 package viklings.prototype.setup;
 
 import engine.GameEngine;
+import engine.GameTimer;
 import engine.GameWindow;
 import engine.ai.IntelligenceEngine;
 import engine.controls.ControlsEngine;
@@ -62,7 +63,8 @@ public class ViklingsSetup {
 	
 	ControlsEngine controlsEngine = new ControlsEngine(gameWindow);
 	
-	GameEngine gameEngine = new GameEngine(gameWindow);
+	GameTimer timer = new GameTimer();
+	GameEngine gameEngine = new GameEngine(gameWindow, timer);
 	
 	gameEngine.addEngineComponent(physicsEngine);
 	gameEngine.addEngineComponent(aiEngine);
@@ -71,7 +73,13 @@ public class ViklingsSetup {
 	gameEngine.setGraphicsEngine(graphicsEngine);
 	
 	ViklingsLogic logic = new ViklingsLogic(
-		physicsEngine, aiEngine, stateEngine, controlsEngine, terrainGenerator, camera, scene);
+		physicsEngine, 
+		aiEngine, 
+		stateEngine, 
+		controlsEngine, 
+		terrainGenerator, 
+		camera, 
+		scene);
 	
 	logic.setupGame();
 	
