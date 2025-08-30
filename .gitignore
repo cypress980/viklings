@@ -7,6 +7,9 @@
 target
 bin
 
+# agent notes messes
+agent-notes/screenshots/
+
 # vim swap files
 *.swp
 
