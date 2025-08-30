@@ -1,0 +1,13 @@
+[package]
+name = "viklings-rust"
+version = "0.1.0"
+edition = "2021"
+authors = ["Viklings Team"]
+description = "Rust+bgfx prototype for next-generation Viklings game engine"
+
+[dependencies]
+bgfx-rs = "0.17"
+winit = "0.30"
+bytemuck = { version = "1.0", features = ["derive"] }
+env_logger = "0.11"
+log = "0.4"
