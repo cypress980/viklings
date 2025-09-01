@@ -12,6 +12,8 @@ let goalRandomizationEventId = null;
 
 // Initialize game
 function initGame() {
+    // Initialize game engine with 60 FPS target
+    Deno.core.ops.op_init_engine(60.0);
     // Create goal entity FIRST so player renders on top
     goal = Deno.core.ops.op_create_entity();
     Deno.core.ops.op_add_position(goal, 350, 250);
@@ -56,6 +58,9 @@ function initGame() {
     
     // Schedule goal randomization every 2 seconds
     goalRandomizationEventId = Deno.core.ops.op_schedule_repeating_event_now(2000, "randomizeGoalPosition");
+    
+    // Schedule FPS logging every 10 seconds
+    Deno.core.ops.op_schedule_repeating_event_now(10000, "logPerformanceStats");
     
     // Game initialized silently
 }
@@ -213,6 +218,26 @@ function randomizeGoalPosition() {
         const newY = minY + Math.random() * (maxY - minY);
         
         Deno.core.ops.op_set_entity_position(goal, newX, newY);
+    }
+}
+
+// Performance stats logging function
+function logPerformanceStats() {
+    const avgFps = Deno.core.ops.op_get_fps();
+    const instantFps = Deno.core.ops.op_get_instant_fps();
+    const totalFrames = Deno.core.ops.op_get_total_frames();
+    const uptime = Deno.core.ops.op_get_uptime();
+    const targetFps = Deno.core.ops.op_get_target_fps();
+    
+    console.log(`PERF: Target: ${targetFps.toFixed(0)} FPS, Avg: ${avgFps.toFixed(1)}, Instant: ${instantFps.toFixed(1)}, Frames: ${totalFrames}, Uptime: ${uptime.toFixed(1)}s`);
+    
+    // Demonstrate dynamic frame rate changes
+    if (uptime > 15 && uptime < 16) {
+        console.log("Changing to 120 FPS for performance test...");
+        Deno.core.ops.op_set_target_fps(120.0);
+    } else if (uptime > 25 && uptime < 26) {
+        console.log("Changing to 30 FPS for battery saving mode...");
+        Deno.core.ops.op_set_target_fps(30.0);
     }
 }
 

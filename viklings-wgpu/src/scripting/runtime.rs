@@ -26,7 +26,14 @@ extension!(
         op_schedule_repeating_event_now,
         op_cancel_event,
         op_get_game_time_seconds,
-        op_get_game_time_millis
+        op_get_game_time_millis,
+        op_get_fps,
+        op_get_instant_fps,
+        op_get_total_frames,
+        op_get_uptime,
+        op_init_engine,
+        op_set_target_fps,
+        op_get_target_fps
     ]
 );
 

@@ -5,7 +5,8 @@ use crate::ecs::{EntityManager, Position, Render, Controllable, Hitbox};
 use crate::ecs::{RenderProps, RenderShape, ControllableProps, HitboxProps, InputType, BoundsType};
 use crate::physics::{CollisionSystem, CollisionEventData};
 use crate::graphics::{UISystem, TextOptions};
-use crate::timing::{GameClock, GameTimer};
+use crate::timing::{GameClock, GameTimer, FrameLimiter};
+use crate::stats::StatsCollector;
 
 // Global state for triangle position (accessible from TypeScript)
 static TRIANGLE_POSITION: Mutex<[f32; 2]> = Mutex::new([0.0, 0.0]);
@@ -24,6 +25,12 @@ static GAME_CLOCK: Mutex<Option<GameClock>> = Mutex::new(None);
 
 // Global game timer
 static GAME_TIMER: Mutex<Option<GameTimer>> = Mutex::new(None);
+
+// Global stats collector
+static STATS_COLLECTOR: Mutex<Option<StatsCollector>> = Mutex::new(None);
+
+// Global frame limiter
+static FRAME_LIMITER: Mutex<Option<FrameLimiter>> = Mutex::new(None);
 
 // TypeScript op to move triangle to specific position
 #[op2(fast)]
@@ -408,4 +415,118 @@ pub fn init_game_clock_and_timer() {
         timer.init();
         *game_timer_opt = Some(timer);
     }
+}
+
+// Initialize stats collector
+pub fn init_stats_collector() {
+    if let Ok(mut stats_opt) = STATS_COLLECTOR.lock() {
+        *stats_opt = Some(StatsCollector::new());
+    }
+}
+
+// Initialize frame limiter
+pub fn init_frame_limiter(target_fps: f32) {
+    if let Ok(mut frame_limiter_opt) = FRAME_LIMITER.lock() {
+        *frame_limiter_opt = Some(FrameLimiter::new(target_fps));
+    }
+}
+
+// Update stats (called from main app)
+pub fn update_stats() {
+    if let Ok(mut stats_opt) = STATS_COLLECTOR.lock() {
+        if let Some(ref mut stats) = *stats_opt {
+            stats.record_frame();
+        }
+    }
+}
+
+// TypeScript operation to get current FPS
+#[op2(fast)]
+pub fn op_get_fps() -> f32 {
+    if let Ok(stats_opt) = STATS_COLLECTOR.lock() {
+        if let Some(ref stats) = *stats_opt {
+            return stats.get_avg_fps();
+        }
+    }
+    0.0
+}
+
+// TypeScript operation to get instant FPS
+#[op2(fast)]
+pub fn op_get_instant_fps() -> f32 {
+    if let Ok(stats_opt) = STATS_COLLECTOR.lock() {
+        if let Some(ref stats) = *stats_opt {
+            return stats.get_instant_fps();
+        }
+    }
+    0.0
+}
+
+// TypeScript operation to get total frames
+#[op2(fast)]
+#[bigint] pub fn op_get_total_frames() -> u64 {
+    if let Ok(stats_opt) = STATS_COLLECTOR.lock() {
+        if let Some(ref stats) = *stats_opt {
+            return stats.get_stats().total_frames;
+        }
+    }
+    0
+}
+
+// TypeScript operation to initialize game engine with target FPS
+#[op2(fast)]
+pub fn op_init_engine(target_fps: f32) -> bool {
+    // Initialize frame limiter with specified FPS
+    if let Ok(mut frame_limiter_opt) = FRAME_LIMITER.lock() {
+        *frame_limiter_opt = Some(FrameLimiter::new(target_fps));
+    }
+    
+    debug!("Game engine initialized with target FPS: {}", target_fps);
+    true
+}
+
+// TypeScript operation to set target FPS
+#[op2(fast)]
+pub fn op_set_target_fps(fps: f32) -> bool {
+    if let Ok(mut frame_limiter_opt) = FRAME_LIMITER.lock() {
+        *frame_limiter_opt = Some(FrameLimiter::new(fps));
+        debug!("Target FPS changed to: {}", fps);
+        return true;
+    }
+    false
+}
+
+// TypeScript operation to get target FPS
+#[op2(fast)]
+pub fn op_get_target_fps() -> f32 {
+    if let Ok(frame_limiter_opt) = FRAME_LIMITER.lock() {
+        if let Some(ref frame_limiter) = *frame_limiter_opt {
+            return frame_limiter.get_target_fps();
+        }
+    }
+    60.0 // Default fallback
+}
+
+// Get frame limiter for app use
+pub fn with_frame_limiter<T, F>(f: F) -> Option<T>
+where
+    F: FnOnce(&FrameLimiter) -> T,
+{
+    if let Ok(frame_limiter_opt) = FRAME_LIMITER.lock() {
+        if let Some(ref frame_limiter) = *frame_limiter_opt {
+            return Some(f(frame_limiter));
+        }
+    }
+    None
+}
+
+// TypeScript operation to get engine uptime
+#[op2(fast)]
+pub fn op_get_uptime() -> f32 {
+    if let Ok(stats_opt) = STATS_COLLECTOR.lock() {
+        if let Some(ref stats) = *stats_opt {
+            return stats.get_uptime();
+        }
+    }
+    0.0
 }

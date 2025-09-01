@@ -13,7 +13,9 @@ use log::{debug, info, error};
 use crate::graphics::GraphicsEngine;
 use crate::scripting::{ScriptingEngine, operations};
 use crate::ecs::{InputState, systems::MovementSystem};
-use crate::timing::{GameTimer, GameClock, FrameLimiter};
+use crate::timing::{GameTimer, GameClock};
+use crate::stats::StatsCollector;
+use crate::terminal::{Terminal, TerminalKey};
 // Removed unused CollisionSystem import - it's accessed through operations module
 use super::timer::Timer;
 
@@ -26,8 +28,9 @@ pub struct App {
     timer: Timer, // Keep old timer for compatibility
     game_timer: GameTimer,
     game_clock: GameClock,
-    frame_limiter: FrameLimiter,
     last_frame_time: Instant,
+    stats_collector: StatsCollector,
+    terminal: Terminal,
 }
 
 impl App {
@@ -41,8 +44,9 @@ impl App {
             timer: Timer::new(),
             game_timer: GameTimer::new(),
             game_clock: GameClock::new(),
-            frame_limiter: FrameLimiter::new(60.0), // 60 FPS target
             last_frame_time: Instant::now(),
+            stats_collector: StatsCollector::new(),
+            terminal: Terminal::new(),
         }
     }
 
@@ -73,6 +77,12 @@ impl ApplicationHandler for App {
         
         // Initialize global game clock and timer for TypeScript access BEFORE scripting
         operations::init_game_clock_and_timer();
+        
+        // Initialize stats collector
+        operations::init_stats_collector();
+        
+        // Register terminal commands
+        self.register_terminal_commands();
         
         // Initialize scripting engine
         let mut scripting_engine = ScriptingEngine::new();
@@ -110,11 +120,24 @@ impl ApplicationHandler for App {
                 event: KeyEvent {
                     state: key_state,
                     physical_key: PhysicalKey::Code(key_code),
+                    text,
                     ..
                 },
                 ..
             } => {
                 let pressed = key_state == ElementState::Pressed;
+                
+                // Handle text input for terminal
+                if pressed && self.terminal.is_visible() {
+                    if let Some(text) = text {
+                        for c in text.chars() {
+                            if c.is_ascii_graphic() || c == ' ' {
+                                self.terminal.handle_char_input(c);
+                            }
+                        }
+                    }
+                }
+                
                 self.handle_input(key_code, pressed);
             }
             WindowEvent::RedrawRequested => {
@@ -151,6 +174,59 @@ impl ApplicationHandler for App {
 
 impl App {
     fn handle_input(&mut self, key_code: KeyCode, pressed: bool) -> bool {
+        // Handle terminal toggle (grave/tilde key)
+        if key_code == KeyCode::Backquote && pressed {
+            self.terminal.toggle();
+            return true;
+        }
+
+        // If terminal is open, handle terminal input
+        if self.terminal.is_visible() && pressed {
+            match key_code {
+                KeyCode::ArrowUp => {
+                    self.terminal.handle_key_input(TerminalKey::ArrowUp);
+                    return true;
+                }
+                KeyCode::ArrowDown => {
+                    self.terminal.handle_key_input(TerminalKey::ArrowDown);
+                    return true;
+                }
+                KeyCode::ArrowLeft => {
+                    self.terminal.handle_key_input(TerminalKey::ArrowLeft);
+                    return true;
+                }
+                KeyCode::ArrowRight => {
+                    self.terminal.handle_key_input(TerminalKey::ArrowRight);
+                    return true;
+                }
+                KeyCode::Escape => {
+                    self.terminal.hide();
+                    return true;
+                }
+                KeyCode::Enter => {
+                    // Handle enter - execute command
+                    let command = self.terminal.get_current_input().to_string();
+                    self.terminal.handle_char_input('\n');
+                    
+                    // Handle special commands
+                    if command == "clear" {
+                        // Clear terminal history - this would be handled by UI
+                    } else if command == "quit" {
+                        self.terminal.hide();
+                    }
+                    return true;
+                }
+                KeyCode::Backspace => {
+                    self.terminal.handle_char_input('\x08');
+                    return true;
+                }
+                _ => {
+                    // Other keys while terminal is open are handled elsewhere
+                }
+            }
+        }
+
+        // Regular game input handling
         match key_code {
             KeyCode::ArrowUp => {
                 self.input_state.up = pressed;
@@ -232,8 +308,10 @@ impl App {
     }
 
     fn render(&mut self) {
-        // Apply frame rate limiting
-        self.frame_limiter.sync(self.last_frame_time);
+        // Apply frame rate limiting using global frame limiter (set by TypeScript)
+        let _ = operations::with_frame_limiter(|frame_limiter| {
+            frame_limiter.sync(self.last_frame_time);
+        });
         self.last_frame_time = std::time::Instant::now();
         
         // Update all systems
@@ -263,6 +341,10 @@ impl App {
             ui_system.render();
         });
 
+        // Record frame for performance stats (both local and global)
+        self.stats_collector.record_frame();
+        operations::update_stats();
+        
         // Update FPS counter
         self.timer.increment_frame();
         let elapsed = self.timer.elapsed();
@@ -295,5 +377,42 @@ impl App {
                 }
             }
         }
+    }
+
+    fn register_terminal_commands(&mut self) {
+        // FPS command
+        self.terminal.register_command("fps".to_string(), |args| {
+            if args.is_empty() {
+                // Get current FPS
+                format!("Target FPS: {:.1}", crate::scripting::operations::op_get_target_fps())
+            } else if let Ok(fps) = args[0].parse::<f32>() {
+                // Set target FPS
+                if fps > 0.0 && fps <= 1000.0 {
+                    let _ = crate::scripting::operations::op_set_target_fps(fps);
+                    format!("Target FPS set to: {:.1}", fps)
+                } else {
+                    "FPS must be between 0.1 and 1000".to_string()
+                }
+            } else {
+                "Usage: fps [target_fps]".to_string()
+            }
+        });
+
+        // Stats command
+        self.terminal.register_command("stats".to_string(), |_args| {
+            let fps = crate::scripting::operations::op_get_fps();
+            let instant_fps = crate::scripting::operations::op_get_instant_fps();
+            let total_frames = crate::scripting::operations::op_get_total_frames();
+            let uptime = crate::scripting::operations::op_get_uptime();
+            let target_fps = crate::scripting::operations::op_get_target_fps();
+
+            format!("Engine Statistics:\n\
+                     Target FPS: {:.1}\n\
+                     Average FPS: {:.1}\n\
+                     Instant FPS: {:.1}\n\
+                     Total Frames: {}\n\
+                     Uptime: {:.1}s", 
+                    target_fps, fps, instant_fps, total_frames, uptime)
+        });
     }
 }
