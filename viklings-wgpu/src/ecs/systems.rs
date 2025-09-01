@@ -1,23 +1,18 @@
-use std::time::Instant;
+use log::trace;
 use super::components::*;
 use super::entity_manager::{EntityManager, EntityId};
 
 // Movement system for controllable entities
 pub struct MovementSystem {
-    last_frame_time: Instant,
 }
 
 impl MovementSystem {
     pub fn new() -> Self {
         Self {
-            last_frame_time: Instant::now(),
         }
     }
 
-    pub fn update(&mut self, entity_manager: &mut EntityManager, input_state: &InputState) {
-        let current_time = Instant::now();
-        let delta_time = current_time.duration_since(self.last_frame_time).as_secs_f32();
-        self.last_frame_time = current_time;
+    pub fn update(&mut self, entity_manager: &mut EntityManager, input_state: &InputState, delta_time: f32) {
 
         // Collect entity IDs and controllable data first
         let controllable_data: Vec<(EntityId, Controllable)> = entity_manager.controllables()
@@ -45,7 +40,7 @@ impl MovementSystem {
                 
                 let new_pos = (position.x, position.y);
                 if old_pos != new_pos {
-                    println!("🏃 Entity {} moved from {:?} to {:?} (speed={:.1}, delta={:.3})", 
+                    trace!("Entity {} moved from {:?} to {:?} (speed={:.1}, delta={:.3})", 
                             entity_id, old_pos, new_pos, controllable.movement_speed, delta_time);
                 }
                 

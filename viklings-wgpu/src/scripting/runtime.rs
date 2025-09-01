@@ -1,4 +1,5 @@
 use deno_core::{JsRuntime, RuntimeOptions, extension};
+use log::{info, error};
 use super::operations::*;
 
 // Extension containing our ops
@@ -11,10 +12,21 @@ extension!(
         op_add_position,
         op_add_render,
         op_add_controllable,
+        op_remove_controllable,
         op_add_hitbox,
         op_poll_collision_events,
         op_set_entity_color,
-        op_set_entity_position
+        op_set_entity_position,
+        op_show_text,
+        op_hide_text,
+        op_clear_ui,
+        op_schedule_event_at_seconds,
+        op_schedule_event_at_millis,
+        op_schedule_repeating_event,
+        op_schedule_repeating_event_now,
+        op_cancel_event,
+        op_get_game_time_seconds,
+        op_get_game_time_millis
     ]
 );
 
@@ -39,8 +51,8 @@ impl ScriptingEngine {
         "#;
 
         match runtime.execute_script("<init>", test_script) {
-            Ok(_) => println!("TypeScript ECS initialization successful"),
-            Err(e) => eprintln!("TypeScript execution error: {}", e),
+            Ok(_) => info!("TypeScript ECS initialization successful"),
+            Err(e) => error!("TypeScript execution error: {}", e),
         }
 
         Self { runtime }
@@ -59,8 +71,30 @@ impl ScriptingEngine {
         Ok(())
     }
 
+    pub fn load_square_game(&mut self) -> Result<(), Box<dyn std::error::Error>> {
+        let game_script = std::fs::read_to_string("square_game.ts")
+            .expect("Failed to read square_game.ts");
+        
+        self.execute_script("<square_game>", game_script)?;
+        Ok(())
+    }
+
+    pub fn load_game_test(&mut self) -> Result<(), Box<dyn std::error::Error>> {
+        // Load just the base game without any test overlay
+        let game_script = std::fs::read_to_string("square_game.ts")
+            .expect("Failed to read square_game.ts");
+        self.execute_script("<square_game>", game_script)?;
+        
+        Ok(())
+    }
+
     pub fn call_collision_check(&mut self) -> Result<(), Box<dyn std::error::Error>> {
         self.execute_script("<collision_check>", "checkCollisions();".to_string())?;
+        Ok(())
+    }
+
+    pub fn call_game_update(&mut self) -> Result<(), Box<dyn std::error::Error>> {
+        self.execute_script("<game_update>", "gameUpdate();".to_string())?;
         Ok(())
     }
 }

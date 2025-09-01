@@ -1,6 +1,7 @@
 use std::sync::Arc;
 use wgpu::util::DeviceExt;
 use winit::window::Window;
+use log::{debug, info, warn};
 use crate::ecs::{EntityManager, EntityId, Position, Render};
 use super::vertex::{Vertex, VERTICES};
 use super::instance_data::InstanceData;
@@ -178,7 +179,7 @@ impl GraphicsEngine {
         // Size for up to 100 entities (reasonable for collision testing)
         const MAX_INSTANCES: usize = 100;
         let instance_buffer_size = MAX_INSTANCES * std::mem::size_of::<InstanceData>();
-        println!("Creating instance buffer: {} bytes for {} max instances", instance_buffer_size, MAX_INSTANCES);
+        info!("Creating instance buffer: {} bytes for {} max instances", instance_buffer_size, MAX_INSTANCES);
         
         let instance_buffer = device.create_buffer(&wgpu::BufferDescriptor {
             label: Some("Instance Buffer - DEV006"),
@@ -242,11 +243,11 @@ impl GraphicsEngine {
         
         #[cfg(debug_assertions)]
         {
-            println!("=== Instance Data Generation ===");
-            println!("Generated {} instances for rendering", instance_data.len());
+            debug!("=== Instance Data Generation ===");
+            debug!("Generated {} instances for rendering", instance_data.len());
             if !instance_data.is_empty() {
-                println!("Instance data size: {} bytes", instance_data.len() * std::mem::size_of::<InstanceData>());
-                println!("Buffer capacity: {} instances", 100); // MAX_INSTANCES from buffer creation
+                debug!("Instance data size: {} bytes", instance_data.len() * std::mem::size_of::<InstanceData>());
+                debug!("Buffer capacity: {} instances", 100); // MAX_INSTANCES from buffer creation
             }
         }
         
@@ -301,7 +302,7 @@ impl GraphicsEngine {
                     // Validate instance count doesn't exceed buffer capacity
                     const MAX_INSTANCES: usize = 100;
                     if instance_data.len() > MAX_INSTANCES {
-                        eprintln!("WARNING: Too many instances ({}) for buffer capacity ({}). Truncating.", 
+                        warn!("Too many instances ({}) for buffer capacity ({}). Truncating.", 
                                  instance_data.len(), MAX_INSTANCES);
                         instance_data.truncate(MAX_INSTANCES);
                     }
@@ -334,7 +335,7 @@ impl GraphicsEngine {
                     render_pass.draw(0..6, 0..instance_data.len() as u32);
                     
                     #[cfg(debug_assertions)]
-                    println!("✅ Instanced draw: {} entities with single draw call", instance_data.len());
+                    debug!("Instanced draw: {} entities with single draw call", instance_data.len());
                 }
             }
         }

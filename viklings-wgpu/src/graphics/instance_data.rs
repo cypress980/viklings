@@ -38,7 +38,8 @@ impl InstanceData {
     // Debug helper to print instance data
     #[cfg(debug_assertions)]
     pub fn debug_print(&self, index: usize) {
-        println!("Instance {}: pos={:?}, scale={:?}, color={:?}", 
-                 index, self.position, self.scale, self.color);
+        use log::trace;
+        trace!("Instance {}: pos={:?}, scale={:?}, color={:?}", 
+               index, self.position, self.scale, self.color);
     }
 }

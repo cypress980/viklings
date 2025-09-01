@@ -44,6 +44,10 @@ impl EntityManager {
         self.controllables.insert(entity, controllable);
     }
 
+    pub fn remove_controllable(&mut self, entity: EntityId) {
+        self.controllables.remove(&entity);
+    }
+
     pub fn add_hitbox(&mut self, entity: EntityId, hitbox: Hitbox) {
         self.hitboxes.insert(entity, hitbox);
     }
@@ -53,11 +57,15 @@ impl EntityManager {
     }
 
     pub fn get_entities_with_render(&self) -> Vec<(EntityId, &Position, &Render)> {
-        self.renders.keys()
+        let mut entities: Vec<_> = self.renders.keys()
             .filter_map(|&entity_id| {
                 self.positions.get(&entity_id).map(|pos| (entity_id, pos, &self.renders[&entity_id]))
             })
-            .collect()
+            .collect();
+        
+        // Sort by entity ID to ensure consistent render order (higher IDs render on top)
+        entities.sort_by_key(|(entity_id, _, _)| *entity_id);
+        entities
     }
 
     pub fn get_controllable_entities(&self) -> Vec<(EntityId, &Position, &Controllable)> {

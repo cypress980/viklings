@@ -1,4 +1,5 @@
 use viklings_wgpu::application::App;
+use log::info;
 
 // Move collision tests to separate module
 #[cfg(test)]
@@ -222,8 +223,8 @@ mod collision_tests {
 fn main() {
     env_logger::init();
     
-    println!("Viklings wgpu Triangle Prototype - ARCH-002 (Modular)");
-    println!("Initializing modular rendering system...");
+    info!("Viklings wgpu Triangle Prototype - ARCH-002 (Modular)");
+    info!("Initializing modular rendering system...");
 
     App::run();
 }
